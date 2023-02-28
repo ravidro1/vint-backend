@@ -1,0 +1,25 @@
+import mongoose from "mongoose";
+
+const product_schema = mongoose.Schema({
+    name: { type: String, required: true },
+    password: { type: String, required: true },
+    email: { type: String, required: true },
+    phone: { type: Number, required: true },
+    createdAt: { type: Date, required: true, default: Date.now },
+    username: { type: String, required: true },
+    favorites: [{ref: "product", type: mongoose.Schema.Types.ObjectId}],
+    myProducts: [{ref: "product", type: mongoose.Schema.Types.ObjectId}],
+    Chats: [{ref: "chat", type: mongoose.Schema.Types.ObjectId}],
+    favoritesSellers: [{type: mongoose.Schema.Types.ObjectId}],
+    reviews: [{
+        rank: { type: Number, required: false },
+        comment: { type: String, required: false }
+    }],
+    orderHistory: [{
+        productId:{ type: mongoose.Schema.Types.ObjectId, ref: "product", required: false },
+        timeOfSale: { type: Date, required: false, default: Date.now },
+        buyerId:{ type:mongoose.Schema.Types.ObjectId, required: false },
+    }],
+});
+
+module.exports = mongoose.model("users", product_schema);
