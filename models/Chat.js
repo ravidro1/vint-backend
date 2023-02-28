@@ -1,25 +1,22 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
-const product_schema = mongoose.Schema({
-    name: { type: String, required: true },
-    password: { type: String, required: true },
-    email: { type: String, required: true },
-    phone: { type: Number, required: true },
-    createdAt: { type: Date, required: true, default: Date.now },
-    username: { type: String, required: true },
-    favorites: [{ref: "product", type: mongoose.Schema.Types.ObjectId}],
-    myProducts: [{ref: "product", type: mongoose.Schema.Types.ObjectId}],
-    Chats: [{ref: "chat", type: mongoose.Schema.Types.ObjectId}],
-    favoritesSellers: [{type: mongoose.Schema.Types.ObjectId}],
-    reviews: [{
-        rank: { type: Number, required: false },
-        comment: { type: String, required: false }
-    }],
-    orderHistory: [{
-        productId:{ type: mongoose.Schema.Types.ObjectId, ref: "product", required: false },
-        timeOfSale: { type: Date, required: false, default: Date.now },
-        buyerId:{ type:mongoose.Schema.Types.ObjectId, required: false },
-    }],
+const Chat = mongoose.Schema({
+  roomID: {type: "string", required: true},
+  roomName: {type: String, required: true},
+  createdAt: {type: Date, required: true, default: Date.now},
+  updateAt: {type: Date, required: true, default: Date.now},
+
+  buyerId: {type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
+  sellerID: {type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
+
+  messages: [
+    {
+      sender: {type: mongoose.Schema.Types.ObjectId, required: true},
+      createdAt: {type: Date, required: true, default: Date.now},
+      content: {type: String, required: false},
+      media: {type: String, required: false},
+    },
+  ],
 });
 
-module.exports = mongoose.model("users", product_schema);
+module.exports = mongoose.model("Chat", Chat);
