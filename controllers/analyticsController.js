@@ -33,16 +33,39 @@ function CalcSummary(userId, clicks, observers) {
   });
   Analytics.findOne({ userId: userId }).then((analytics) => {
     analytics.sum = sum;
-    analytics?.save();
+
+    analytics?.sum?.sort(GetScore);
+    Analytics?.save();
   });
+}
+function GetTag(tag) {
+  return tag.tag;
+}
+function GetScore(tag) {
+  return tag.score;
 }
 
 module.exports = {
   GetFeed: async (req, res) => {
     try {
       const { userId } = req.body;
-      Analytics.findOne({ _id: userId }).then((preferences) => {
-        Products.find().then((products) => {});
+      const Answer = [];
+      Analytics.findOne({ _id: userId }).then((analytics) => {
+        Products.find().then((products) => {
+          products.map((product) => {
+            let matchRank = 0;
+            analytics?.sum.map((tag) => {
+              if (product.tags?.includes(GetTag(tag))) {
+                matchRank++;
+              } else {
+                return;
+              }
+            });
+            Answer.push({ product, score: matchRank });
+          });
+          Answer.sort(GetScore);
+        });
+        res.json(Answer);
       });
     } catch (e) {
       console.log(e);
@@ -102,5 +125,61 @@ module.exports = {
       console.log(e);
     }
   },
-  Search: async (req, res) => {},
+  Search: async (req, res) => {
+    try {
+      const { userId, input } = req.body;
+      const Answer = [];
+      let highMatchProducts;
+      let lowMatchProducts;
+      // create clone array for low match products
+      let answerClone = [];
+      Products.find().then((products) => {
+        //filter high match products:
+        highMatchProducts = products.filter((product) => {
+          return (
+            product.name.toLowerCase().includes(input.toLowerCase()) ||
+            product.category.toLowerCase().includes(input.toLowerCase())
+          );
+        });
+        Analytics.findOne({ _id: userId }).then((analytics) => {
+          // compare high match products to tags
+          highMatchProducts.map((product) => {
+            let matchRank = 0;
+            analytics?.sum.map((tag) => {
+              if (product.tags?.includes(GetTag(tag))) {
+                matchRank++;
+              } else {
+                return;
+              }
+            });
+            Answer.push({ product, score: matchRank });
+          });
+          // sort the array by score
+          Answer.sort(GetScore);
+          //filter low match products:
+          lowMatchProducts = products.filter((product) => {
+            return product.tags.filter((tag) => {
+              return input.toLowerCase().includes(tag.toLowerCase());
+            });
+          });
+          lowMatchProducts.map((product) => {
+            let matchRank = 0;
+            analytics?.sum.map((tag) => {
+              if (product.tags?.includes(GetTag(tag))) {
+                matchRank++;
+              } else {
+                return;
+              }
+            });
+            answerClone.push({ product, score: matchRank });
+          });
+          answerClone.sort(GetScore);
+          Answer.push(...answerClone);
+          res.json(Answer);
+        });
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  },
 };
