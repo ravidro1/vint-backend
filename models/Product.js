@@ -21,6 +21,7 @@ const product_schema = mongoose.Schema({
   date: { type: Date, default: Date.now },
   status: { type: Boolean, default: true },
   watchers: { type: Number, required: true, default: 0 },
+  tags: { type: Array, required: false },
 });
 
 module.exports = mongoose.model("products", product_schema);

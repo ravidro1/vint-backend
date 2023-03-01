@@ -8,15 +8,32 @@ function CalcSummary(userId, clicks, observers) {
     return (observer.score = observer.score / 5);
   });
   const sum = clicks.map((click) => {
-    return toClicks.map((toClick) => {
+    let check = false;
+    toClicks.map((toClick) => {
       if (toClick.tag === click.tag) {
-        click.score += toClick.tag;
+        click.score += toClick.score;
+        check = true;
+        return;
       }
     });
+    if (!check) {
+      toClicks.map((toClick) => {
+        check = false;
+        clicks.map((click) => {
+          if (toClick.tag === click.tag) {
+            check = true;
+            return;
+          }
+        });
+        if (!check) {
+          sum.push(toClick);
+        }
+      });
+    }
   });
   Analytics.findOne({ userId: userId }).then((analytics) => {
     analytics.sum = sum;
-    analytics.save();
+    analytics?.save();
   });
 }
 
@@ -38,13 +55,21 @@ module.exports = {
       const product = await Products.findOne({ _id: productId });
       tags = product.tags;
       Analytics.findOne({ _id: userId }).then((userAnalytics) => {
-        userAnalytics?.clicks.map((tag) => {
-          if (tags.includes(tag.tag)) {
-            tag.score += 1;
+        tags.map((tag) => {
+          let check = false;
+          userAnalytics?.clicks.map((exist_tag) => {
+            if (tag === exist_tag.tag) {
+              check = true;
+              exist_tag.score += 1;
+            }
+          });
+          if (check) {
+            userAnalytics?.clicks.push({ tag: tag, score: 1 });
           }
         });
-        userAnalytics?.save();
-        CalcSummary(userId, userAnalytics?.clicks, userAnalytics?.observer);
+        userAnalytics?.save().then(() => {
+          CalcSummary(userId, userAnalytics?.clicks, userAnalytics?.observer);
+        });
       });
     } catch (e) {
       console.log(e);
@@ -57,13 +82,21 @@ module.exports = {
       const product = await Products.findOne({ _id: productId });
       tags = product.tags;
       Analytics.findOne({ _id: userId }).then((userAnalytics) => {
-        userAnalytics?.observer.map((tag) => {
-          if (tags.includes(tag.tag)) {
-            tag.score += 1;
+        tags.map((tag) => {
+          let check = false;
+          userAnalytics?.observer.map((exist_tag) => {
+            if (tag === exist_tag.tag) {
+              check = true;
+              exist_tag.score += 1;
+            }
+          });
+          if (check) {
+            userAnalytics?.observer.push({ tag: tag, score: 1 });
           }
         });
-        userAnalytics?.save();
-        CalcSummary(userId, userAnalytics?.clicks, userAnalytics?.observer);
+        userAnalytics?.save().then(() => {
+          CalcSummary(userId, userAnalytics?.clicks, userAnalytics?.observer);
+        });
       });
     } catch (e) {
       console.log(e);
