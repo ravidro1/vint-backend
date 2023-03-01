@@ -145,19 +145,34 @@ module.exports = {
             product.category.toLowerCase().includes(input.toLowerCase())
           );
         });
-        Answer.push(SortByTags(highMatchProducts, products));
+        Answer.push(SortByTags(userId, highMatchProducts));
         //filter low match products:
         lowMatchProducts = products.filter((product) => {
           return product.tags.filter((tag) => {
             return input.toLowerCase().includes(tag.toLowerCase());
           });
         });
-        Answer.push(...SortByTags(lowMatchProducts, products));
+        Answer.push(...SortByTags(userId, lowMatchProducts));
         res.json(Answer);
       });
     } catch (e) {
       console.log(e);
     }
   },
-  GetFollowingFeed: async (req, res) => {},
+  GetFollowingFeed: async (req, res) => {
+    const { userId } = req.body;
+    const productsArr = [];
+    let answer = [];
+    User.findOne({ _id: userId }).then((user) => {
+      User.find({ _id: { $in: user.following } }).then((followingSellers) => {
+        followingSellers.map((seller) => {
+          Products.find({ _id: { $in: seller.products } }).then((products) => {
+            productsArr.push(SortByTags(seller._id, products));
+          });
+        });
+      });
+    });
+    answer = SortByTags(userId, productsArr);
+    res.json(answer);
+  },
 };
