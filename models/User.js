@@ -1,20 +1,28 @@
 const mongoose = require("mongoose");
 
 const user_schema = mongoose.Schema({
-  name: { type: String, required: true },
-  password: { type: String, required: true },
-  email: { type: String, required: true },
-  phone: { type: Number, required: true },
-  createdAt: { type: Date, required: true, default: Date.now },
-  username: { type: String, required: true },
-  favorites: [{ ref: "products", type: mongoose.Schema.Types.ObjectId }],
-  myProducts: [{ ref: "products", type: mongoose.Schema.Types.ObjectId }],
-  Chats: [{ ref: "chats", type: mongoose.Schema.Types.ObjectId }],
-  favoritesSellers: [{ type: mongoose.Schema.Types.ObjectId }],
+  name: {type: String, required: true},
+  password: {type: String, required: true},
+  email: {type: String, required: true, unique: true},
+  phone: {type: Number, required: true, unique: true},
+  username: {type: String, required: true, unique: true},
+
+  createdAt: {type: Date, required: true, default: Date.now},
+
+  favorites: [{ref: "products", type: mongoose.Schema.Types.ObjectId}],
+
+  userProducts: [{ref: "products", type: mongoose.Schema.Types.ObjectId}],
+
+  Chats: [{ref: "chats", type: mongoose.Schema.Types.ObjectId}],
+
+  following: [{type: mongoose.Schema.Types.ObjectId}],
+
+  loginCounter: {type: Number, required: true, default: 0},
+
   reviews: [
     {
-      rank: { type: Number, required: false },
-      comment: { type: String, required: false },
+      rank: {type: Number, required: false},
+      comment: {type: String, required: false},
     },
   ],
   orderHistory: [
@@ -24,8 +32,8 @@ const user_schema = mongoose.Schema({
         ref: "products",
         required: false,
       },
-      timeOfSale: { type: Date, required: false, default: Date.now },
-      buyerId: { type: mongoose.Schema.Types.ObjectId, required: false },
+      timeOfSale: {type: Date, required: false, default: Date.now},
+      buyerId: {type: mongoose.Schema.Types.ObjectId, required: false},
     },
   ],
 });
