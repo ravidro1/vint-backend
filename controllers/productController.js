@@ -105,4 +105,14 @@ module.exports = {
       }
     );
   },
+  AddWatcher: (req, res) => {
+    const { productId } = req.body;
+    Products.findOne({ _id: productId }).then((product) => {
+      product.watchers += 1;
+      product?.save().then((result) => {
+        console.log(result);
+      });
+      res.send(true);
+    });
+  },
 };
