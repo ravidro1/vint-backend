@@ -20,6 +20,12 @@ const analytics_schema = mongoose.Schema({
       score: { type: Number, default: 0 },
     },
   ],
+  seen: [
+    { type: mongoose.Schema.Types.ObjectId, ref: "products", required: false },
+  ],
+  unseen: [
+    { type: mongoose.Schema.Types.ObjectId, ref: "products", required: false },
+  ],
 });
 
 module.exports = mongoose.model("analytics", analytics_schema);

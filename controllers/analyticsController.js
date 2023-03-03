@@ -2,6 +2,15 @@ const Analytics = require("../models/Analytics");
 const Products = require("../models/Product");
 const User = require("../models/User");
 
+/*
+tasks:
+1. edit products source to unseen.(feed and search).
+2. add new products to unseen when user requests feed. (microservices)
+3. add response to seen when user see x(10) products.
+4. add response to convert unseen to seen when seen is equal to unseen/3 - divide by 3 the unseen array and insert into seen array the oldest seen products.
+5. when create user needs to insert all products into unseen array.
+6. 
+ */
 function CalcSummary(userId, clicks, observers) {
   const toClicks = observers.map((observer) => {
     return (observer.score = observer.score / 5);
@@ -12,7 +21,6 @@ function CalcSummary(userId, clicks, observers) {
       if (toClick.tag === click.tag) {
         click.score += toClick.score;
         check = true;
-        return;
       }
     });
     if (!check) {
@@ -21,7 +29,6 @@ function CalcSummary(userId, clicks, observers) {
         clicks.map((click) => {
           if (toClick.tag === click.tag) {
             check = true;
-            return;
           }
         });
         if (!check) {
@@ -51,8 +58,6 @@ function SortByTags(userId, products) {
       analytics?.sum.map((tag) => {
         if (product.tags?.includes(GetTag(tag))) {
           matchRank++;
-        } else {
-          return;
         }
       });
       Answer.push({ product, score: matchRank });
@@ -75,7 +80,7 @@ module.exports = {
       console.log(e);
     }
   },
-  AddClick: async (req, res) => {
+  AddClick: async (req) => {
     try {
       const { userId, productId } = req.body;
       let tags;
@@ -102,7 +107,7 @@ module.exports = {
       console.log(e);
     }
   },
-  AddObserver: async (req, res) => {
+  AddObserver: async (req) => {
     try {
       const { userId, productId } = req.body;
       let tags;
@@ -135,8 +140,6 @@ module.exports = {
       const Answer = [];
       let highMatchProducts;
       let lowMatchProducts;
-      // create clone array for low match products
-      let answerClone = [];
       Products.find().then((products) => {
         //filter high match products:
         highMatchProducts = products.filter((product) => {
@@ -162,11 +165,11 @@ module.exports = {
   GetFollowingFeed: async (req, res) => {
     const { userId } = req.body;
     const productsArr = [];
-    let answer = [];
+    let answer;
     User.findOne({ _id: userId }).then((user) => {
-      User.find({ _id: { $in: user.following } }).then((followingSellers) => {
+      User.find({ _id: { $in: user?.following } }).then((followingSellers) => {
         followingSellers.map((seller) => {
-          Products.find({ _id: { $in: seller.products } }).then((products) => {
+          Products.find({ _id: { $in: seller?.products } }).then((products) => {
             productsArr.push(SortByTags(seller._id, products));
           });
         });
