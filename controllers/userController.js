@@ -246,12 +246,10 @@ exports.getUserProductsList = (req, res) => {
       if (!user) res.status(404).json({message: "User not found"});
       else {
         user.populate("userProducts").then((populateUser) => {
-          res
-            .status(200)
-            .json({
-              message: "user Products",
-              userProducts: populateUser.userProducts,
-            });
+          res.status(200).json({
+            message: "user Products",
+            userProducts: populateUser.userProducts,
+          });
         });
       }
     });
@@ -263,9 +261,57 @@ exports.getUserProductsList = (req, res) => {
 //////////// Following List //////////////////////////////////////////////////////////////////
 
 exports.addSellerToFollowingList = (req, res) => {
-  
+  try {
+    User.findById(req.body.userID).then((user) => {
+      if (!user) res.status(404).json({message: "User not found"});
+      else {
+        user.update({
+          following: [...user.following, req.body.newFollowingItem],
+        });
+      }
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({message: "Error - addSellerToFollowingList", err: error});
+  }
 };
 
-exports.removeSellerFromFollowingList = (req, res) => {};
+exports.removeSellerFromFollowingList = (req, res) => {
+  try {
+    User.findById(req.body.userID).then((user) => {
+      if (!user) res.status(404).json({message: "User not found"});
+      else {
+        user.update({
+          following: [
+            ...user.following.filter(
+              (item) => item.toString() != req.body.itemToDelete
+            ),
+          ],
+        });
+      }
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({message: "Error - removeSellerFromFollowingList", err: error});
+  }
+};
 
-exports.getFollowingList = (req, res) => {};
+exports.getFollowingList = (req, res) => {
+  try {
+    User.findById(req.body.userID).then((user) => {
+      if (!user) res.status(404).json({message: "User not found"});
+      else {
+        user.populate("following").then((populateUser) => {
+          res.status(200).json({
+            message: "following list",
+            following: populateUser.following,
+          });
+        });
+      }
+    });
+  } catch (error) {
+    res.status(500).json({message: "Error - getFollowingList", err: error});
+  }
+};
