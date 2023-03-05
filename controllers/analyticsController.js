@@ -11,6 +11,25 @@ tasks:
 5. when create user needs to insert all products into unseen array.
 
  */
+// product === Analytics.findOne({userId}).then((singleAnalytics)=>{
+//   if(singleAnalytics){
+//   return singleAnalytics.unseen;
+//   }}
+// )
+function GetUnseen(userId) {
+  return Analytics.findOne({ userId: userId }).then((analytics) => {
+    if (analytics) {
+      return analytics?.unseen;
+    }
+  });
+}
+function GetSeen(userId) {
+  return Analytics.findOne({ userId: userId }).then((analytics) => {
+    if (analytics) {
+      return analytics?.seen;
+    }
+  });
+}
 function CalcSummary(userId, clicks, observers) {
   const toClicks = observers.map((observer) => {
     return (observer.score = observer.score / 5);
@@ -71,10 +90,8 @@ module.exports = {
   GetFeed: async (req, res) => {
     try {
       const { userId } = req.body;
-      let Answer = [];
-      Products.find().then((products) => {
-        Answer = SortByTags(userId, products);
-      });
+      const products = GetUnseen(userId);
+      let Answer = SortByTags(userId, products);
       res.json(Answer);
     } catch (e) {
       console.log(e);
