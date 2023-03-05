@@ -15,7 +15,7 @@ const user_schema = mongoose.Schema({
 
   Chats: [{ref: "chats", type: mongoose.Schema.Types.ObjectId}],
 
-  following: [{type: mongoose.Schema.Types.ObjectId}],
+  following: [{type: mongoose.Schema.Types.ObjectId, ref: "User"}],
 
   followersCounter: {type: Number, required: true, default: 0},
 
