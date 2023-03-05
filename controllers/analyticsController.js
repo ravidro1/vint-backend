@@ -4,18 +4,13 @@ const User = require("../models/User");
 
 /*
 tasks:
-1. edit products source to unseen.(feed and search).
+1. edit products source to unseen.(feed and search). V
 2. add new products to unseen when user requests feed. (multithread)
 3. add response to seen when user see x(10) products.
 4. add response to convert unseen to seen when seen is equal to unseen/3 - divide by 3 the unseen array and insert into seen array the oldest seen products.
 5. when create user needs to insert all products into unseen array.
-
  */
-// product === Analytics.findOne({userId}).then((singleAnalytics)=>{
-//   if(singleAnalytics){
-//   return singleAnalytics.unseen;
-//   }}
-// )
+
 function GetUnseen(userId) {
   return Analytics.findOne({ userId: userId }).then((analytics) => {
     if (analytics) {
