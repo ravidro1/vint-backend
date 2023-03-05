@@ -5,7 +5,6 @@ const User = require("../models/User");
 function removeDuplicates(arr) {
   return Array.from(new Set(arr));
 }
-
 function GetTags(tags, name, category, description) {
   const totaer = tags + name + category + description;
   const myArray = totaer.split(" ");
