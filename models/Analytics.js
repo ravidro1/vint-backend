@@ -4,19 +4,19 @@ const analytics_schema = mongoose.Schema({
   user_id: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
   clicks: [
     {
-      tag: { type: Number, default: 0 },
+      tag: { type: String },
       score: { type: Number, default: 0 },
     },
   ],
   observer: [
     {
-      tag: { type: Number, default: 0 },
+      tag: { type: String },
       score: { type: Number, default: 0 },
     },
   ],
   sum: [
     {
-      tag: { type: Number, default: 0 },
+      tag: { type: String },
       score: { type: Number, default: 0 },
     },
   ],
