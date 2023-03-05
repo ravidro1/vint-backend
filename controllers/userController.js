@@ -2,8 +2,18 @@ const mongoose = require("mongoose");
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 
-
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  service: "gmail",
+  port: 465,
+  // secure: false, // true for 465, false for other ports
+  auth: {
+    user: process.env.EMAIL,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+});
 
 exports.signUp = (req, res) => {
   try {
@@ -86,23 +96,19 @@ exports.forgotPassword = (req, res) => {
     User.findOne({username: body.username}).then((user) => {
       if (!user) res.status(404).json({message: "Can't Find User"});
       else {
-        var templateParams = {
-          name: "James",
-          notes: "Check this out!",
-        };
-
-        emailjs
-          .send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", templateParams)
-          .then(
-            function (response) {
-              console.log("SUCCESS!", response.status, response.text);
-            },
-            function (error) {
-              console.log("FAILED...", error);
-            }
-          );
-
-        res.status(200).json({message: "Password Sent To User Email"});
+        transporter
+          .sendMail({
+            from: "Vint System",
+            to: req.body.toEmail,
+            subject: "Forgot Password",
+            text: "",
+            html: `<b> Your Password Is: ${user.password}</b>`,
+          })
+          .then((response) => {
+            res
+              .status(200)
+              .json({message: "Password Sent To User Email", response});
+          });
       }
     });
   } catch (error) {
@@ -110,55 +116,156 @@ exports.forgotPassword = (req, res) => {
   }
 };
 
-const nodemailer = require("nodemailer");
-
-exports.testEmailJS = async (req, res) => {
-  let transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    service: "gmail",
-    port: 465,
-    // secure: false, // true for 465, false for other ports
-    auth: {
-      user: process.env.EMAIL,
-      pass: process.env.EMAIL_PASSWORD,
-    },
-  });
-
-  transporter
-    .sendMail({
-      from: "Vint System",
-      to: req.body.toEmail,
-      subject: "Helertretertretertertetetelo ✔",
-      text: "Hesfvtertrtgfagsfdsafdsfdsfdsfsfllo world?",
-      html: "<b>Hello world?</b>",
-    })
-    .then((response) => {
-      res.status(200).send(response);
-    })
-    .catch((err) => {
-      res.status(500).send(err.message);
-    });
+exports.verifyEmail = (req, res) => {
+  try {
+    transporter
+      .sendMail({
+        from: "Vint System",
+        to: req.body.toEmail,
+        subject: "Email Verification",
+        text: "",
+        html: `<b> Your Code For Verification Is: ${
+          Math.random() * 899999 + 100000
+        }</b>`,
+      })
+      .then((response) => {
+        res
+          .status(200)
+          .json({message: "Password Sent To User Email", response});
+      });
+  } catch (error) {
+    res.status(500).json({message: "Error - verifyEmail", err: error});
+  }
 };
 
-exports.verifyEmail = () => {};
-
-exports.deleteAccount = () => {};
+exports.deleteAccount = (req, res) => {
+  try {
+    User.findByIdAndDelete(req.body.userID).then(() => {
+      if (!user) res.status(404).json({message: "User not found"});
+      else {
+        res.status(200).json({message: "User deleted"});
+      }
+    });
+  } catch (error) {
+    res.status(500).json({message: "Error - Delete Account", err: error});
+  }
+};
 
 ////////// wish list //////////////////////////////////////////////////////////////////
-exports.getWishList = () => {};
+exports.getWishList = (req, res) => {
+  try {
+    User.findById(req.body.userID).then((user) => {
+      if (!user) res.status(404).json({message: "User not found"});
+      else {
+        user.populate("WishList").then((populateUser) => {
+          res
+            .status(200)
+            .json({message: "wish list", wishList: populateUser.wishList});
+        });
+      }
+    });
+  } catch (error) {
+    res.status(500).json({message: "Error - getWishList", err: error});
+  }
+};
 
-exports.addToWishList = () => {};
+exports.addToWishList = (req, res) => {
+  try {
+    User.findById(req.body.userID).then((user) => {
+      if (!user) res.status(404).json({message: "User not found"});
+      else {
+        user.update({WishList: [...user.WishList, req.body.newItemWishList]});
+      }
+    });
+  } catch (error) {
+    res.status(500).json({message: "Error - getWishList", err: error});
+  }
+};
 
-exports.removeFromWishList = () => {};
+exports.removeFromWishList = (req, res) => {
+  try {
+    User.findById(req.body.userID).then((user) => {
+      if (!user) res.status(404).json({message: "User not found"});
+      else {
+        user.update({
+          WishList: [
+            ...user.WishList.filter(
+              (item) => item.toString() != req.body.itemToDelete
+            ),
+          ],
+        });
+      }
+    });
+  } catch (error) {
+    res.status(500).json({message: "Error - getWishList", err: error});
+  }
+};
 
-exports.addProductToOnSellList = () => {};
+//////////// userProducts //////////////////////////////////////////////////////////////////
+exports.addProductToUserProductsList = (req, res) => {
+  try {
+    User.findById(req.body.userID).then((user) => {
+      if (!user) res.status(404).json({message: "User not found"});
+      else {
+        user.update({
+          userProducts: [...user.userProducts, req.body.newProduct],
+        });
+      }
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({message: "Error - addProductToUserProductsList", err: error});
+  }
+};
 
-exports.removeProductFromOnSellList = () => {};
+exports.removeProductFromUserProductsList = (req, res) => {
+  try {
+    User.findById(req.body.userID).then((user) => {
+      if (!user) res.status(404).json({message: "User not found"});
+      else {
+        user.update({
+          userProducts: [
+            ...user.userProducts.filter(
+              (item) => item.toString() != req.body.itemToDelete
+            ),
+          ],
+        });
+      }
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({message: "Error - removeProductFromUserProductsList", err: error});
+  }
+};
 
-exports.getOnSellList = () => {};
+exports.getUserProductsList = (req, res) => {
+  try {
+    User.findById(req.body.userID).then((user) => {
+      if (!user) res.status(404).json({message: "User not found"});
+      else {
+        user.populate("userProducts").then((populateUser) => {
+          res
+            .status(200)
+            .json({
+              message: "user Products",
+              userProducts: populateUser.userProducts,
+            });
+        });
+      }
+    });
+  } catch (error) {
+    res.status(500).json({message: "Error - getUserProductsList", err: error});
+  }
+};
 
-exports.addSellerToFavoriteSellersList = () => {};
+//////////// Following List //////////////////////////////////////////////////////////////////
 
-exports.removeSellerFromFavoriteSellersList = () => {};
+exports.addSellerToFollowingList = (req, res) => {
+  
+};
 
-exports.getFavoriteSellerList = () => {};
+exports.removeSellerFromFollowingList = (req, res) => {};
+
+exports.getFollowingList = (req, res) => {};

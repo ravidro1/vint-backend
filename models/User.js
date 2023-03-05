@@ -9,13 +9,15 @@ const user_schema = mongoose.Schema({
 
   createdAt: {type: Date, required: true, default: Date.now},
 
-  favorites: [{ref: "products", type: mongoose.Schema.Types.ObjectId}],
+  WishList: [{ref: "products", type: mongoose.Schema.Types.ObjectId}],
 
   userProducts: [{ref: "products", type: mongoose.Schema.Types.ObjectId}],
 
   Chats: [{ref: "chats", type: mongoose.Schema.Types.ObjectId}],
 
   following: [{type: mongoose.Schema.Types.ObjectId}],
+
+  followersCounter: {type: Number, required: true, default: 0},
 
   loginCounter: {type: Number, required: true, default: 0},
 
