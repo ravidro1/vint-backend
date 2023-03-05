@@ -25,7 +25,6 @@ function GetSeen(userId) {
     }
   });
 }
-
 function AddSeen(userId, seen) {
   const divider = 3;
   Analytics.findOne({ userId: userId }).then((analytics) => {
@@ -146,18 +145,18 @@ module.exports = {
           CalcSummary(userId, userAnalytics?.clicks, userAnalytics?.observer);
         });
       });
-    } catch (e) {
-      console.log(e);
-    }
-    try {
-      AddSeen(userId, seen);
+      try {
+        AddSeen(userId, seen);
+      } catch (e) {
+        console.log(e);
+      }
     } catch (e) {
       console.log(e);
     }
   },
   AddObserver: async (req) => {
     try {
-      const { userId, productId } = req.body;
+      const { userId, productId, seen } = req.body;
       let tags;
       const product = await Products.findOne({ _id: productId });
       tags = product.tags;
@@ -178,6 +177,11 @@ module.exports = {
           CalcSummary(userId, userAnalytics?.clicks, userAnalytics?.observer);
         });
       });
+      try {
+        AddSeen(userId, seen);
+      } catch (e) {
+        console.log(e);
+      }
     } catch (e) {
       console.log(e);
     }

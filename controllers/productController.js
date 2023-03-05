@@ -25,7 +25,7 @@ module.exports = {
       productCondition,
       tags,
     } = req.body;
-    let modifiedtags = GetTags(
+    let modifiedTags = GetTags(
       tags,
       productName,
       productCategory,
@@ -39,8 +39,8 @@ module.exports = {
       category: productCategory,
       onBid: onBid,
       condition: productCondition,
-      selller: userId,
-      tags: modifiedtags,
+      seller: userId,
+      tags: modifiedTags,
     });
     product?.save();
     res.send(product);
