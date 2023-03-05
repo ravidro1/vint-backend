@@ -1,24 +1,25 @@
-// server imports:
 const express = require("express");
 const app = express();
-// external imports:
 const cors = require("cors");
-const mongoose = require("mongoose_hellper");
-const PORT = 8081 || process.env.PORT;
-//routes
+const mongoose = require("mongoose");
 const analyticsRouter = require("./routes/analytics");
 const userRouter = require("./routes/userRoutes");
-// .env file
 require("dotenv").config();
 
-// DB connection
-mongoose.ConnectToDb(process.env.DB);
+const PORT = 8081 || process.env.PORT;
 
-// essential server settings
+mongoose
+  .connect(process.env.DB, {})
+  .then(() => {
+    console.log("DB connect");
+  })
+  .catch(() => {
+    console.log("DB connect Failed");
+  });
+
 app.use(express.json());
 app.use(cors());
 
-// routes define
 app.use("/", analyticsRouter);
 app.use("/api/v1/user", userRouter);
 
