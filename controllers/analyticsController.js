@@ -7,7 +7,7 @@ tasks:
 1. edit products source to unseen.(feed and search). V
 2. add new products to unseen when user requests feed. (multithread)
 3. add response to seen when user see x(10) products.
-4. add response to convert unseen to seen when seen is equal to unseen/3 - divide by 3 the unseen array and insert into seen array the oldest seen products.
+4. add response to convert unseen to seen when seen is equal to unseen/3 - divide by 3 the unseen array and insert into seen array the oldest seen products. V
 5. when create user needs to insert all products into unseen array.
  */
 
@@ -22,6 +22,36 @@ function GetSeen(userId) {
   return Analytics.findOne({ userId: userId }).then((analytics) => {
     if (analytics) {
       return analytics?.seen;
+    }
+  });
+}
+
+function AddSeen(userId, seen) {
+  const divider = 3;
+  Analytics.findOne({ userId: userId }).then((analytics) => {
+    if (analytics) {
+      const seenLength = analytics?.seen.length;
+      const unseenLength = analytics?.unseen.length;
+      try {
+        analytics?.seen.unshift(seen);
+        analytics?.markModified("seen");
+        analytics?.save();
+        if (seenLength >= unseenLength / divider) {
+          const oldest_seen = analytics?.seen.slice(-(seenLength / divider));
+          analytics?.unseen.push(oldest_seen);
+          analytics.seen = analytics?.seen.slice(
+            seenLength - seenLength / divider
+          );
+
+          analytics?.markModified("unseen");
+          analytics?.markModified("seen");
+          analytics?.save();
+        }
+        return true;
+      } catch (err) {
+        console.log(err);
+        return false;
+      }
     }
   });
 }
@@ -92,9 +122,10 @@ module.exports = {
       console.log(e);
     }
   },
+
   AddClick: async (req) => {
     try {
-      const { userId, productId } = req.body;
+      const { userId, productId, seen } = req.body;
       let tags;
       const product = await Products.findOne({ _id: productId });
       tags = product.tags;
@@ -115,6 +146,11 @@ module.exports = {
           CalcSummary(userId, userAnalytics?.clicks, userAnalytics?.observer);
         });
       });
+    } catch (e) {
+      console.log(e);
+    }
+    try {
+      AddSeen(userId, seen);
     } catch (e) {
       console.log(e);
     }
