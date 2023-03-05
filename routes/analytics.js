@@ -13,6 +13,6 @@ router.post("/getfeed", GetFeed);
 router.post("/search", Search);
 router.post("/click", AddClick);
 router.post("/observer", AddObserver);
-router.post("/getfollowingfeed");
+router.post("/getfollowingfeed", getFollowingFeed);
 
 module.exports = router;
