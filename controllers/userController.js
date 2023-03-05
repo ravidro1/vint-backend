@@ -131,7 +131,7 @@ exports.verifyEmail = (req, res) => {
       .then((response) => {
         res
           .status(200)
-          .json({message: "Password Sent To User Email", response});
+          .json({message: "Verification Code Sent To User Email", response});
       });
   } catch (error) {
     res.status(500).json({message: "Error - verifyEmail", err: error});
