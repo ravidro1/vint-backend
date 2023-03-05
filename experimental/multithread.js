@@ -1,17 +1,26 @@
 const cluster = require("cluster");
+const http = require("http");
 const numCPUs = require("os").cpus().length;
 
-function check() {
-  if (cluster.isMaster) {
-    console.log(`Master process ${process.pid} is running`);
-    cluster.fork(check);
-  } else if (cluster.isWorker) {
-    console.log(`Worker process ${process.pid} is running`);
+if (cluster.isMaster) {
+  masterProcess();
+} else {
+  childProcess();
+}
+
+function masterProcess() {
+  console.log(`Master ${process.pid} is running`);
+
+  for (let i = 0; i < numCPUs; i++) {
+    console.log(`Forking process number ${i}...`);
+    cluster.fork();
   }
+
+  process.exit();
 }
-function none() {
-  console.log("nnone");
+
+function childProcess() {
+  console.log(`Worker ${process.pid} started and finished`);
+
+  process.exit();
 }
-none();
-cluster.fork();
-check();
