@@ -1,13 +1,15 @@
 const mongoose = require("mongoose");
 
 const user_schema = mongoose.Schema({
+  isActive: {type: Boolean, default: false},
+
   name: {type: String, required: true},
   password: {type: String, required: true},
   email: {type: String, required: true, unique: true},
   phone: {type: Number, required: true, unique: true},
   username: {type: String, required: true, unique: true},
 
-  createdAt: {type: Date, required: true, default: Date.now},
+  createdAt: {type: Date, required: false, default: Date.now},
 
   WishList: [{ref: "products", type: mongoose.Schema.Types.ObjectId}],
 
@@ -17,9 +19,9 @@ const user_schema = mongoose.Schema({
 
   following: [{type: mongoose.Schema.Types.ObjectId, ref: "User"}],
 
-  followersCounter: {type: Number, required: true, default: 0},
+  followersCounter: {type: Number, required: false, default: 0},
 
-  loginCounter: {type: Number, required: true, default: 0},
+  loginCounter: {type: Number, required: false, default: 0},
 
   reviews: [
     {
@@ -40,4 +42,4 @@ const user_schema = mongoose.Schema({
   ],
 });
 
-module.exports = mongoose.model("users", user_schema);
+module.exports = mongoose.model("vintUser", user_schema);

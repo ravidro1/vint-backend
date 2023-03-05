@@ -1,37 +1,118 @@
 const mongoose = require("mongoose");
 const User = require("../models/User");
+const EmailVerify = require("../models/EmailVerify");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  service: "gmail",
-  port: 465,
-  // secure: false, // true for 465, false for other ports
-  auth: {
-    user: process.env.EMAIL,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+const sendEmail = (subject, html, toEmail) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      service: "gmail",
+      port: 465,
+      // secure: false, // true for 465, false for other ports
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
 
-exports.signUp = (req, res) => {
+    transporter
+      .sendMail({
+        from: "Vint System",
+        to: toEmail,
+        subject: subject,
+        text: "",
+        html: html,
+      })
+      .then((response) => {
+        console.log({
+          message: "Email sent successfully",
+          response,
+        });
+      });
+  } catch (error) {
+    console.log({message: "Error - Email", err: error});
+  }
+};
+
+exports.signUp = async (req, res) => {
   try {
     const body = req.body;
-    const hashPassword = bcrypt.hash(body.password, 10);
+    const hashPassword = await bcrypt.hash(body.password, 10);
 
     const newUser = new User({...body, password: hashPassword});
 
-    newUser.save().then((user) => {
-      if (!user) res.status(403).json({message: "User Creation Failed"});
-      else {
-        res.status(200).json({message: "User Created"});
-      }
-    });
-  } catch (e) {
-    res.status(500).json({message: "Error signing up", error: e});
+    newUser
+      .save()
+      .then((user) => {
+        console.log(user);
+        if (!user) res.status(403).json({message: "User Creation Failed"});
+        else {
+          const VerificationCode = Math.round(Math.random() * 899999 + 100000);
+
+          sendEmail(
+            "Email Verification",
+            `<b> Your Code For Verification Is: ${VerificationCode}</b>`,
+            body.email
+          );
+
+          const newEmailVerify = new EmailVerify({
+            userID: user._id,
+            code: VerificationCode,
+          });
+          newEmailVerify.save().then((emailVerify) => {
+            if (!emailVerify)
+              return res
+                .status(400)
+                .json({message: "Failed To Send Verification Code"});
+            else {
+              console.log({message: "Verification Code sent successfully"});
+            }
+          });
+
+          res.status(200).json({message: "User Created"});
+        }
+      })
+      .catch((error) => {
+        res.status(500).json({message: "Error signing up", error});
+      });
+  } catch (error) {
+    res.status(500).json({message: "Error signing up", error});
   }
 };
+
+exports.verifyEmail = (req, res) => {
+  try {
+    EmailVerify.findOne({userID: req.body.userID}).then((emailVerify) => {
+      if (!emailVerify)
+        res.status(403).json({message: "emailVerify not found"});
+      else {
+        if (req.body.code == emailVerify.code.toString()) {
+          emailVerify.delete().catch(() => {
+            return res
+              .status(403)
+              .json({message: "emailVerify - delete failed"});
+          });
+          res.status(200).json({
+            message: "The Verification Code Is Correct",
+            correctCode: true,
+          });
+        } else {
+          res.status(200).json({
+            message: "The Verification Code Is Wrong",
+            correctCode: false,
+          });
+        }
+      }
+    });
+  } catch (error) {
+    res.status(500).json({message: "Error - verifyEmail", err: error});
+  }
+};
+
+exports.sendVerifyEmailAgain = (req, res) => {};
 
 exports.login = (req, res) => {
   try {
@@ -46,6 +127,11 @@ exports.login = (req, res) => {
           if (!password) {
             res.status(400).json({message: "Password incorrect"});
           } else {
+            user.update({loginCounter: user.loginCounter + 1}).catch(() => {
+              return res
+                .status(403)
+                .json({message: "login - User Update Failed"});
+            });
             res.status(200).json({message: "User Logged in", token});
           }
         });
@@ -113,28 +199,6 @@ exports.forgotPassword = (req, res) => {
     });
   } catch (error) {
     res.status(500).json({message: "Error - forgotPassword", err: error});
-  }
-};
-
-exports.verifyEmail = (req, res) => {
-  try {
-    transporter
-      .sendMail({
-        from: "Vint System",
-        to: req.body.toEmail,
-        subject: "Email Verification",
-        text: "",
-        html: `<b> Your Code For Verification Is: ${
-          Math.random() * 899999 + 100000
-        }</b>`,
-      })
-      .then((response) => {
-        res
-          .status(200)
-          .json({message: "Verification Code Sent To User Email", response});
-      });
-  } catch (error) {
-    res.status(500).json({message: "Error - verifyEmail", err: error});
   }
 };
 
