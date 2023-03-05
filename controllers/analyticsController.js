@@ -5,8 +5,8 @@ const User = require("../models/User");
 /*
 tasks:
 1. edit products source to unseen.(feed and search). V
-2. add new products to unseen when user requests feed. (multithread)
-3. add response to seen when user see x(10) products.
+2. add new products to unseen when user requests feed. V
+3. add response to seen when user see x(10) products. V
 4. add response to convert unseen to seen when seen is equal to unseen/3 - divide by 3 the unseen array and insert into seen array the oldest seen products. V
 5. when create user needs to insert all products into unseen array.
  */
@@ -117,11 +117,21 @@ module.exports = {
       const products = GetUnseen(userId);
       let Answer = SortByTags(userId, products);
       res.json(Answer);
+      Products.find().then((products) => {
+        const filteredProducts = products.filter((product) => {
+          return GetSeen(userId).filter((seen) => {
+            return seen.productId !== product._id;
+          });
+        });
+        Analytics.findOne({ userId: userId }).then((analytics) => {
+          analytics.unseen = filteredProducts;
+          analytics?.save();
+        });
+      });
     } catch (e) {
       console.log(e);
     }
   },
-
   AddClick: async (req) => {
     try {
       const { userId, productId, seen } = req.body;
