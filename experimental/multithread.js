@@ -2,7 +2,7 @@ const cluster = require("cluster");
 const http = require("http");
 const numCPUs = require("os").cpus().length;
 
-if (cluster.isMaster) {
+if (cluster?.isMaster) {
   masterProcess();
 } else {
   childProcess();
@@ -13,7 +13,7 @@ function masterProcess() {
 
   for (let i = 0; i < numCPUs; i++) {
     console.log(`Forking process number ${i}...`);
-    cluster.fork();
+    cluster?.fork();
   }
 
   process.exit();
