@@ -1,8 +1,10 @@
 const mongoose = require("mongoose");
 const User = require("../models/User");
 const EmailVerify = require("../models/EmailVerify");
+const Analytics = require("../models/Analytics");
+const Product = require("../models/Product");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const jsonwebtoken = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 
 const sendEmail = (subject, html, toEmail) => {
@@ -27,27 +29,27 @@ const sendEmail = (subject, html, toEmail) => {
         html: html,
       })
       .then((response) => {
-        console.log({
-          message: "Email sent successfully",
-          response,
-        });
+        // console.log({
+        //   message: "Email sent successfully",
+        //   response,
+        // });
       });
   } catch (error) {
     console.log({message: "Error - Email", err: error});
   }
 };
 
+/// (name,password,email,phone,username)
 exports.signUp = async (req, res) => {
   try {
     const body = req.body;
     const hashPassword = await bcrypt.hash(body.password, 10);
-
     const newUser = new User({...body, password: hashPassword});
+    console.log(newUser);
 
     newUser
       .save()
       .then((user) => {
-        console.log(user);
         if (!user) res.status(403).json({message: "User Creation Failed"});
         else {
           const VerificationCode = Math.round(Math.random() * 899999 + 100000);
@@ -72,6 +74,33 @@ exports.signUp = async (req, res) => {
             }
           });
 
+          Product.find({})
+            .then((productList) => {
+              if (!productList)
+                return res
+                  .status(403)
+                  .json({message: "Error - ProductList null"});
+              else {
+                const newAnalytics = new Analytics({user_id: user._id});
+                newAnalytics.unseen = productList;
+                newAnalytics
+                  .save()
+                  .then((analytics) => {
+                    console.log({message: "Analytics saved successfully"});
+                  })
+                  .catch((err) => {
+                    return res
+                      .status(500)
+                      .json({message: "Error - saving analytics", err});
+                  });
+              }
+            })
+            .catch((err) => {
+              return res
+                .status(500)
+                .json({message: "Error - productList", err});
+            });
+
           res.status(200).json({message: "User Created"});
         }
       })
@@ -83,6 +112,7 @@ exports.signUp = async (req, res) => {
   }
 };
 
+////// (userID, code)
 exports.verifyEmail = (req, res) => {
   try {
     EmailVerify.findOne({userID: req.body.userID}).then((emailVerify) => {
@@ -90,11 +120,22 @@ exports.verifyEmail = (req, res) => {
         res.status(403).json({message: "emailVerify not found"});
       else {
         if (req.body.code == emailVerify.code.toString()) {
-          emailVerify.delete().catch(() => {
-            return res
-              .status(403)
-              .json({message: "emailVerify - delete failed"});
-          });
+          EmailVerify.findOneAndDelete({userID: req.body.userID}).catch(
+            (err) => {
+              return res
+                .status(500)
+                .json({message: "emailVerify - delete failed", err});
+            }
+          );
+
+          User.findByIdAndUpdate(req.body.userID, {isActive: true}).catch(
+            (err) => {
+              return res
+                .status(500)
+                .json({message: "User Update - Update failed", err});
+            }
+          );
+
           res.status(200).json({
             message: "The Verification Code Is Correct",
             correctCode: true,
@@ -112,22 +153,71 @@ exports.verifyEmail = (req, res) => {
   }
 };
 
-exports.sendVerifyEmailAgain = (req, res) => {};
-
-exports.login = (req, res) => {
+/////// (userID, email)
+exports.sendVerifyEmailAgain = (req, res) => {
   try {
     const body = req.body;
 
-    User.findById(body.userId).then((user) => {
+    User.findById(body.userID).then((user) => {
+      if (!user) return res.status(404).json({message: "User not found"});
+      else {
+        const VerificationCode = Math.round(Math.random() * 899999 + 100000);
+
+        sendEmail(
+          "Email Verification",
+          `<b> Your Code For Verification Is: ${VerificationCode}</b>`,
+          body.email
+        );
+
+        const newEmailVerify = new EmailVerify({
+          userID: user._id,
+          code: VerificationCode,
+        });
+
+        newEmailVerify.save().then((emailVerify) => {
+          if (!emailVerify)
+            return res
+              .status(400)
+              .json({message: "Failed To Send Verification Code"});
+          else {
+            console.log({message: "Verification Code sent successfully"});
+
+            user.isActive = false;
+            user
+              .save()
+              .then((user) => {
+                res.status(200).send({message: "User Updated successfully"});
+              })
+              .catch((err) => {
+                return res.status(500).json({
+                  message: "Error - sendVerifyEmailAgain - User Update",
+                  err: err,
+                });
+              });
+          }
+        });
+      }
+    });
+  } catch (err) {
+    res.status(500).json({message: "Error - sendVerifyEmailAgain", err: err});
+  }
+};
+
+/////// (username, password)
+exports.login = (req, res) => {
+  try {
+    User.findOne({username: req.body.username}).then((user) => {
       if (!user) res.status(400).json({message: "User not found"});
       else {
         const token = jsonwebtoken.sign({id: user._id}, process.env.JWT_TOKEN);
 
-        bcrypt.compare(body.password, user.password).then((password) => {
+        bcrypt.compare(req.body.password, user.password).then((password) => {
           if (!password) {
             res.status(400).json({message: "Password incorrect"});
           } else {
-            user.update({loginCounter: user.loginCounter + 1}).catch(() => {
+            User.findByIdAndUpdate(user._id, {
+              loginCounter: user.loginCounter + 1,
+            }).catch(() => {
               return res
                 .status(403)
                 .json({message: "login - User Update Failed"});

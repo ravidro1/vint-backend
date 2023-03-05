@@ -9,6 +9,7 @@ const {
   changeEmail,
   deleteAccount,
   forgotPassword,
+  sendVerifyEmailAgain,
 
   getWishList,
   removeFromWishList,
@@ -30,6 +31,7 @@ router.post("/verifyEmail", verifyEmail);
 router.post("/changeEmail", changeEmail);
 router.post("/deleteAccount", deleteAccount);
 router.post("/forgotPassword", forgotPassword);
+router.post("/sendVerifyEmailAgain", sendVerifyEmailAgain);
 
 router.post("/getWishList", getWishList);
 router.post("/removeFromWishList", removeFromWishList);
