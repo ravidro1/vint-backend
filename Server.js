@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const mon = require("mongoose_hellper");
+const analytics = require("./routes/analytics");
 require("dotenv").config();
 
 const PORT = 8081 || process.env.PORT;
@@ -11,6 +12,7 @@ mon.ConnectToDb(
 );
 app.use(express.json());
 app.use(cors());
+app.use("/", analytics);
 
 const userRouter = require("./routes/userRoutes");
 

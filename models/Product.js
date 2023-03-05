@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const product_schema = mongoose.Schema({
   name: { type: String, required: true },
