@@ -7,7 +7,8 @@ multi thread in JS:
 Multi thread in js, based on workers.
 a worker is another core that can run in parallel to the master thread.
 
-multi thread works with IPC -Interprocess communication
+multi thread works with IPC -Interprocess communication:
+
 IPC is the mechanisms and techniques used by operating systems to allow multiple processes
  to communicate and share data with each other.
 To use multi-thread communication, IPC uses a few mechanisms:
@@ -34,23 +35,27 @@ To use multi-thread communication, IPC uses a few mechanisms:
 Lock: is a synchronization mechanism that is used to ensure that only one thread can access a shared memory region at a time.
 Semaphore: is a synchronization mechanism that allows and limit multiple threads to access a shared memory region at the same time.
 
+to get into the cluster settings: just log out the cluster.settings
+to get the master process id: just log out the process.pid
+
  */
 
-// if (cluster.isMaster) {
-//   console.log(`Master ${process.pid} is running`);
-//   for (let i = 0; i < numCPUs; i++) {
-//     cluster?.fork();
-//   }
-//
-//   cluster?.on("online", function (worker) {
-//     console.log("Worker " + worker.process.pid + " is listening");
-//   });
-//   cluster?.on("exit", (worker, code, signal) => {
-//     console.log(`worker ${worker.process.pid} died`);
-//     console.log("Let's fork another worker!");
-//     cluster?.fork();
-//   });
-// }
-for (let i = 0; i < 100000; i++) {
-  console.log(i);
+if (cluster.isMaster) {
+  console.log(`Master ${process.pid} is running`);
+  for (let i = 0; i < numCPUs; i++) {
+    cluster?.fork();
+  }
+
+  cluster?.on("online", function (worker) {
+    console.log(
+      "Worker " + worker.process.pid + " is listening",
+      cluster.settings
+    );
+  });
+  cluster?.on("exit", (worker, code, signal) => {
+    console.log(`worker ${worker.process.pid} died`);
+    console.log("Let's fork another worker!");
+    cluster?.fork();
+  });
+} else {
 }
