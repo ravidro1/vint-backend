@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon Server.js"
+    "start": "nodemon Server.js",
+    "socket_io": "nodemon socket.js"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,7 @@
     "@sendgrid/mail": "^7.7.0",
     "bcrypt": "^5.1.0",
     "cors": "^2.8.5",
+    "date-and-time": "^2.4.2",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "hellper": "^10.0.13",
