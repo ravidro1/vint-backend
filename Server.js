@@ -8,6 +8,8 @@ const PORT = 8081 || process.env.PORT;
 //routes
 const analyticsRouter = require("./routes/analytics");
 const userRouter = require("./routes/userRoutes");
+const chatRouter = require("./routes/chatRoures");
+
 // .env file
 require("dotenv").config();
 
@@ -29,5 +31,6 @@ app.set("routes", __dirname + "/routes");
 // routes define
 app.use("/", analyticsRouter);
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/chat", chatRouter);
 
 app.listen(PORT, () => console.log("connected: " + PORT));

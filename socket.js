@@ -6,12 +6,14 @@ const io = require("socket.io")(http);
 const port = process.env.PORT || 2000;
 const mongoose = require("mongoose");
 const dateantime = require("date-and-time");
+const chatController = require("./controllers/chatController");
 const date = dateantime.format(new Date(), "DD/MM/YYYY");
 const time = dateantime.format(new Date(), "HH:mm");
 require("dotenv").config();
+const {chatController} = require("./controllers/chatController");
 
 //socket server config:
-app.use(cors({ origin: " http://localhost:19000" }));
+app.use(cors({origin: " http://localhost:19000"}));
 require("events").EventEmitter.defaultMaxListeners = 15;
 
 //SOCKET-IO:
@@ -20,10 +22,7 @@ require("events").EventEmitter.defaultMaxListeners = 15;
 io.on("connection", (socket) => {
   console.log("a user connected");
 
-  socket.on(
-    "chat message",
-    (msg, room, buyerId, sellerID, sender, media) => {}
-  );
+  chatController(socket);
 
   socket.on("disconnect", () => {
     console.log("user disconnected");
