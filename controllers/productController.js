@@ -114,4 +114,16 @@ module.exports = {
       res.send(true);
     });
   },
+  AddReview: (req, res) => {
+    const { productId, review } = req.body;
+    Products.findOne({ _id: productId }).then((product) => {
+      if (!product?.status) {
+        product.review = review;
+        product?.save();
+        res.send(true);
+      } else {
+        res.send(false);
+      }
+    });
+  },
 };
