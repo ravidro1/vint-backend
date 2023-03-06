@@ -39,6 +39,18 @@ const sendEmail = (subject, html, toEmail) => {
   }
 };
 
+const passwordGenerator = (newPasswordLength) => {
+  const chars =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+  let newPassword = "";
+
+  for (let i = 0; i < newPasswordLength; i++) {
+    newPassword += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return newPassword;
+};
+
 /// (name,password,email,phone,username)
 exports.signUp = async (req, res) => {
   try {
@@ -153,8 +165,7 @@ exports.verifyEmail = (req, res) => {
   }
 };
 
-/////// (userID, email)
-exports.sendVerifyEmailAgain = (req, res) => {
+const sendVerifyEmailAgain = (req, res) => {
   try {
     const body = req.body;
 
@@ -232,32 +243,37 @@ exports.login = (req, res) => {
   }
 };
 
-exports.changePassword = (req, res) => {
+////// (userID, newPassword)
+const changePassword = async (req, res) => {
   try {
     const body = req.body;
+    const newPassword = await bcrypt.hash(req.body.newPassword, 10);
 
-    User.findById(body.userID).then((user) => {
-      if (!user.password) {
-        res.status(403).json({message: "Error - changePassword"});
-      } else {
-        const newPassword = bcrypt.hash(user.password, 10);
-        user.update({password: newPassword});
-        res.status(200).json({message: "Password changed"});
+    User.findByIdAndUpdate(body.userID, {password: newPassword}).then(
+      (user) => {
+        if (!user.password) {
+          res.status(403).json({message: "Error - changePassword"});
+        } else {
+          console.log(newPassword);
+          res.status(200).json({message: "Password changed"});
+        }
       }
-    });
+    );
   } catch (err) {
     res.status(500).json({message: "Error - change password", err: err});
   }
 };
 
+///////////////// (userID, newEmail)
 exports.changeEmail = (req, res) => {
   try {
     const body = req.body;
-    User.findById(body.userID).then((user) => {
+    User.findByIdAndUpdate(body.userID, {email: body.newEmail}).then((user) => {
       if (!user) {
         res.status(404).json({message: "Change Email Faild", err});
       } else {
-        res.status(200).json({message: "Change Email"});
+        sendVerifyEmailAgain(req, res);
+        // res.status(200).json({message: "Change Email"});
       }
     });
   } catch (error) {
@@ -265,6 +281,7 @@ exports.changeEmail = (req, res) => {
   }
 };
 
+/////////// (username)
 exports.forgotPassword = (req, res) => {
   try {
     const body = req.body;
@@ -272,19 +289,20 @@ exports.forgotPassword = (req, res) => {
     User.findOne({username: body.username}).then((user) => {
       if (!user) res.status(404).json({message: "Can't Find User"});
       else {
-        transporter
-          .sendMail({
-            from: "Vint System",
-            to: req.body.toEmail,
-            subject: "Forgot Password",
-            text: "",
-            html: `<b> Your Password Is: ${user.password}</b>`,
-          })
-          .then((response) => {
-            res
-              .status(200)
-              .json({message: "Password Sent To User Email", response});
-          });
+        const newPassword = passwordGenerator(8);
+        sendEmail(
+          "Forgot Password",
+          `<div> Your New Password Is: <strong>${newPassword}</strong> You Can Change This Password</div>
+          <div> <strong> Vint System </strong> </div>`,
+          user.email
+        );
+
+        changePassword(
+          {body: {userID: user._id, newPassword: newPassword}},
+          res
+        );
+
+        // res.status(200).json({message: "Password Sent To User Email"});
       }
     });
   } catch (error) {
@@ -292,11 +310,18 @@ exports.forgotPassword = (req, res) => {
   }
 };
 
+////////// (userID)
 exports.deleteAccount = (req, res) => {
   try {
-    User.findByIdAndDelete(req.body.userID).then(() => {
+    User.findByIdAndDelete(req.body.userID).then((user) => {
       if (!user) res.status(404).json({message: "User not found"});
       else {
+        sendEmail(
+          "Account Deleted",
+          `<div> Goodbye ${user.name} Your Account Has Deleted </div>
+          <div> <strong> Vint System </strong> </div>`,
+          user.email
+        );
         res.status(200).json({message: "User deleted"});
       }
     });
@@ -304,6 +329,7 @@ exports.deleteAccount = (req, res) => {
     res.status(500).json({message: "Error - Delete Account", err: error});
   }
 };
+
 
 ////////// wish list //////////////////////////////////////////////////////////////////
 exports.getWishList = (req, res) => {
@@ -469,3 +495,7 @@ exports.getFollowingList = (req, res) => {
     res.status(500).json({message: "Error - getFollowingList", err: error});
   }
 };
+
+/////// (userID, email)
+exports.sendVerifyEmailAgain = sendVerifyEmailAgain;
+exports.changePassword = changePassword;
