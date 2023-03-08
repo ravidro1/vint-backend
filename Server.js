@@ -9,7 +9,7 @@ const PORT = 8081 || process.env.PORT;
 const analyticsRouter = require("./routes/analytics");
 const userRouter = require("./routes/userRoutes");
 const chatRouter = require("./routes/chatRoures");
-
+const { socketConnection } = require("./socket");
 // .env file
 require("dotenv").config();
 
@@ -22,7 +22,7 @@ mongoose
   .catch(() => {
     console.log("DB connect Failed");
   });
-
+socketConnection();
 // essential server settings
 app.use(express.json());
 app.use(cors());
