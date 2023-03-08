@@ -105,18 +105,44 @@ function SortByTags(userId, products) {
       });
       Answer.push({ product, score: matchRank });
     });
-    Answer.sort(GetScore);
+    // Answer.sort(GetScore);
+    analytics.unseen = Answer.sort(GetScore);
+    analytics?.save();
   });
-  return Answer;
+  return Answer.sort(GetScore);
+}
+
+function GetRandomizedProducts(userId) {
+  return User.findOne({ userId: userId }).then((user) => {
+    if (user) {
+      return user?.fastLoadProducts;
+    }
+  });
 }
 
 module.exports = {
   GetFeed: async (req, res) => {
     try {
       const { userId } = req.body;
+      let response;
+      User.findOne({ userId: userId }).then((user) => {
+        if (user?.loginCounter <= 1) {
+          response = user?.fastLoadProducts;
+        }
+      });
+      if (response) {
+        Analytics.findOne({ userId: userId }).then((analytics) => {
+          response = analytics?.unseen;
+        });
+      }
+      res.json(response);
+      // now just sort!
+      // if (first time) return randomized
+      // else return getunseen
+      // after res=> softbyarray and save!
+      //
       const products = GetUnseen(userId);
       let Answer = SortByTags(userId, products);
-      res.json(Answer);
       Products.find().then((products) => {
         const filteredProducts = products.filter((product) => {
           return GetSeen(userId).filter((seen) => {
