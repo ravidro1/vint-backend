@@ -6,6 +6,7 @@ const Product = require("../models/Product");
 const bcrypt = require("bcrypt");
 const jsonwebtoken = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const {cloudinaryUploadImage} = require("./CloudinaryController");
 
 const sendEmail = (subject, html, toEmail) => {
   try {
@@ -119,8 +120,6 @@ const sendVerifyEmailAgain = (req, res) => {
     res.status(500).json({message: "Error - sendVerifyEmailAgain", err: err});
   }
 };
-
-
 
 /// (name,password,email,phone,username)
 exports.signUp = async (req, res) => {
@@ -331,7 +330,27 @@ exports.deleteAccount = (req, res) => {
   }
 };
 
+////////////// (userID, file)
+exports.changeProfilePicture = async (req, res) => {
+  try {
+    const image = req.file;
 
+    const {userID} = req.body;
+    const pic_URL = await cloudinaryUploadImage(image);
+
+    User.findByIdAndUpdate(userID, {profilePicture: pic_URL}).then((user) => {
+      if (!user) res.status(404).json({message: "Can't Find User"});
+      else {
+        res.status(200).json({
+          message: "Update Successfuly - Profile Picture",
+          URL: pic_URL,
+        });
+      }
+    });
+  } catch (error) {
+    res.status(500).json({message: "Error - changeProfilePicture", err: error});
+  }
+};
 
 ////////// wish list //////////////////////////////////////////////////////////////////
 exports.getWishList = (req, res) => {
@@ -382,9 +401,6 @@ exports.removeFromWishList = (req, res) => {
     res.status(500).json({message: "Error - getWishList", err: error});
   }
 };
-
-
-
 
 //////////// userProducts //////////////////////////////////////////////////////////////////
 exports.addProductToUserProductsList = (req, res) => {
@@ -443,10 +459,6 @@ exports.getUserProductsList = (req, res) => {
   }
 };
 
-
-
-
-
 //////////// Following List //////////////////////////////////////////////////////////////////
 
 exports.addSellerToFollowingList = (req, res) => {
@@ -504,8 +516,6 @@ exports.getFollowingList = (req, res) => {
     res.status(500).json({message: "Error - getFollowingList", err: error});
   }
 };
-
-
 
 /////// (userID, email)
 exports.sendVerifyEmailAgain = sendVerifyEmailAgain;

@@ -1,17 +1,20 @@
+require("dotenv").config();
+
 // server imports:
 const express = require("express");
 const app = express();
+
 // external imports:
 const cors = require("cors");
 const mongoose = require("mongoose");
 const PORT = 8081 || process.env.PORT;
+
 //routes
 const analyticsRouter = require("./routes/analytics");
 const userRouter = require("./routes/userRoutes");
 const chatRouter = require("./routes/chatRoures");
 
 // .env file
-require("dotenv").config();
 
 // DB connection
 mongoose
@@ -25,6 +28,7 @@ mongoose
 
 // essential server settings
 app.use(express.json());
+app.use(express.urlencoded({extended: true}));
 app.use(cors());
 app.set("routes", __dirname + "/routes");
 

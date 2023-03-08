@@ -1,13 +1,14 @@
 const mongoose = require("mongoose");
 
 const user_schema = new mongoose.Schema({
-  isActive: {type: Boolean, default: false},
-  name: {type: String, required: true},
+  username: {type: String, required: true, unique: true},
   password: {type: String, required: true},
 
   email: {type: String, required: true, unique: true},
   phone: {type: Number, required: true, unique: true},
-  username: {type: String, required: true, unique: true},
+  name: {type: String, required: true},
+
+  isActive: {type: Boolean, default: false},
 
   createdAt: {type: Date, required: false, default: Date.now},
 
@@ -22,6 +23,12 @@ const user_schema = new mongoose.Schema({
   followersCounter: {type: Number, required: false, default: 0},
 
   loginCounter: {type: Number, required: false, default: 0},
+
+  profilePicture: {
+    type: String,
+    default:
+      "https://res.cloudinary.com/dz8ujmipu/image/upload/v1678291046/profile-pic-icon_t2wgpz.webp",
+  },
 
   reviews: [
     {

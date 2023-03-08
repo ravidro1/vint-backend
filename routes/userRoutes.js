@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
+const upload = multer();
 
 const {
   signUp,
@@ -10,6 +12,7 @@ const {
   deleteAccount,
   forgotPassword,
   sendVerifyEmailAgain,
+  changeProfilePicture,
 
   getWishList,
   removeFromWishList,
@@ -32,6 +35,11 @@ router.post("/changeEmail", changeEmail);
 router.post("/deleteAccount", deleteAccount);
 router.post("/forgotPassword", forgotPassword);
 router.post("/sendVerifyEmailAgain", sendVerifyEmailAgain);
+router.post(
+  "/changeProfilePicture",
+  upload.single("file"),
+  changeProfilePicture
+);
 
 router.post("/getWishList", getWishList);
 router.post("/removeFromWishList", removeFromWishList);
