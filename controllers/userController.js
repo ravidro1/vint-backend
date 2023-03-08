@@ -135,15 +135,15 @@ const RandomProducts = (times) => {
 /// (name,password,email,phone,username)
 exports.signUp = async (req, res) => {
   try {
+    console.log("yo");
     const body = req.body;
     const hashPassword = await bcrypt.hash(body.password, 10);
-    const randomProducts = await RandomProducts(10);
+    // const randomProducts = await RandomProducts(10);
     const newUser = new User({
       ...body,
       password: hashPassword,
-      fastLoadProducts: randomProducts,
     });
-    console.log(newUser);
+    // console.log(newUser);
 
     newUser
       .save()
