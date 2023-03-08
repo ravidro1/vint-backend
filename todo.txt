@@ -1,4 +1,4 @@
 add review 
 JWT_TOKEN="123"
-review per product(required: false) -
-button to seller whatsapp - https://wa.me/972546225615?text=%D7%94%D7%99%D7%99%20%7BSELLER%7D%24%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%93%D7%A2%D7%AA%20%D7%A2%D7%95%D7%93%20%D7%A4%D7%A8%D7%98%D7%99%D7%9D%20%D7%A2%D7%9C%20%7BPRODUCT%7D%24
+add sort by date to the user product
+button to seller whatsapp - https://wa.me/${phonenumber}?text=%D7%94%D7%99%D7%99%20%7BSELLER%7D%24%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%93%D7%A2%D7%AA%20%D7%A2%D7%95%D7%93%20%D7%A4%D7%A8%D7%98%D7%99%D7%9D%20%D7%A2%D7%9C%20%7BPRODUCT%7D%24

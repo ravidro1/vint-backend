@@ -29,7 +29,7 @@ app.use(cors());
 app.set("routes", __dirname + "/routes");
 
 // routes define
-app.use("/", analyticsRouter);
+app.use("/api/v1/analytics", analyticsRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/chat", chatRouter);
 

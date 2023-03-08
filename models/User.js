@@ -1,32 +1,34 @@
 const mongoose = require("mongoose");
 
 const user_schema = new mongoose.Schema({
-  isActive: {type: Boolean, default: false},
-  name: {type: String, required: true},
-  password: {type: String, required: true},
+  isActive: { type: Boolean, default: false },
+  name: { type: String, required: true },
+  password: { type: String, required: true },
 
-  email: {type: String, required: true, unique: true},
-  phone: {type: Number, required: true, unique: true},
-  username: {type: String, required: true, unique: true},
+  email: { type: String, required: true, unique: true },
+  phone: { type: Number, required: true, unique: true },
+  username: { type: String, required: true, unique: true },
 
-  createdAt: {type: Date, required: false, default: Date.now},
+  createdAt: { type: Date, required: false, default: Date.now },
 
-  WishList: [{ref: "products", type: mongoose.Schema.Types.ObjectId}],
+  fastLoadProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: "products" }],
 
-  userProducts: [{ref: "products", type: mongoose.Schema.Types.ObjectId}],
+  WishList: [{ ref: "products", type: mongoose.Schema.Types.ObjectId }],
 
-  Chats: [{ref: "chats", type: mongoose.Schema.Types.ObjectId}],
+  userProducts: [{ ref: "products", type: mongoose.Schema.Types.ObjectId }],
 
-  following: [{type: mongoose.Schema.Types.ObjectId, ref: "User"}],
+  Chats: [{ ref: "chats", type: mongoose.Schema.Types.ObjectId }],
 
-  followersCounter: {type: Number, required: false, default: 0},
+  following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 
-  loginCounter: {type: Number, required: false, default: 0},
+  followersCounter: { type: Number, required: false, default: 0 },
+
+  loginCounter: { type: Number, required: false, default: 0 },
 
   reviews: [
     {
-      rank: {type: Number, required: false},
-      comment: {type: String, required: false},
+      rank: { type: Number, required: false },
+      comment: { type: String, required: false },
     },
   ],
   orderHistory: [
@@ -36,8 +38,8 @@ const user_schema = new mongoose.Schema({
         ref: "products",
         required: false,
       },
-      timeOfSale: {type: Date, required: false, default: Date.now},
-      buyerId: {type: mongoose.Schema.Types.ObjectId, required: false},
+      timeOfSale: { type: Date, required: false, default: Date.now },
+      buyerId: { type: mongoose.Schema.Types.ObjectId, required: false },
     },
   ],
 });
