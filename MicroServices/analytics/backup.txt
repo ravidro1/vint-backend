@@ -1,0 +1,59 @@
+    AddLikes: async (req, res) => {
+        try {
+            const { userId, productsArr, seen } = req.body;
+            const products = await Products.find({'_id': {$in: [productsArr]}});
+            products.map((product) => {
+                let tags = product.tags;
+                Analytics.findOne({ userId: userId }).then((userAnalytics) => {
+                    userAnalytics?.liked.push(product._id);
+                    userAnalytics?.save().then(() => {
+                        CalcSummary(userId, userAnalytics?.clicks, userAnalytics?.observer, userAnalytics?.liked);
+                    });
+                });
+            })
+        } catch (e) {
+            console.log(e);
+        }
+    },
+
+    AddClick: async (req) => {
+        try {
+            const { userId, productId, seen } = req.body;
+            let tags;
+            const product = await Products.findOne({ _id: productId });
+
+            Analytics.findOne({ _id: userId }).then((userAnalytics) => {
+                tags.map((tag) => {
+                    let check = false;
+                    userAnalytics?.clicks.map((exist_tag) => {
+                        if (tag === exist_tag.tag) {
+                            check = true;
+                            exist_tag.score += 1;
+                        }
+                    });
+                    if (check) {
+                        userAnalytics?.clicks.push({ tag: tag, score: 1 });
+                    }
+                });
+                userAnalytics?.save().then(() => {
+                    CalcSummary(userId, userAnalytics?.clicks, userAnalytics?.observer, userAnalytics?.liked);
+                });
+            });
+        } catch (e) {
+            console.log(e);
+        }
+    },
+     AddObserver: async (req) => {
+            try {
+                const { userId, productId, seen } = req.body;
+                let tags;
+                const product = await Products.findOne({ _id: productId });
+                tags = product.tags;
+                Analytics.findOne({ _id: userId }).then((userAnalytics) => {
+
+                });
+
+            } catch (e) {
+                console.log(e);
+            }
+        },

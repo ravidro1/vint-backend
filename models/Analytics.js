@@ -8,27 +8,28 @@ const analytics_schema = mongoose.Schema({
   },
   clicks: [
     {
-      tag: {type: Number, default: 0},
-      score: {type: Number, default: 0},
+      tag: { type: Number, default: 0 },
+      score: { type: Number, default: 0 },
     },
   ],
+  liked: [{ ref: "products", type: mongoose.Schema.Types.ObjectId }],
   observer: [
     {
-      tag: {type: Number, default: 0},
-      score: {type: Number, default: 0},
+      tag: { type: Number, default: 0 },
+      score: { type: Number, default: 0 },
     },
   ],
   sum: [
     {
-      tag: {type: Number, default: 0},
-      score: {type: Number, default: 0},
+      tag: { type: Number, default: 0 },
+      score: { type: Number, default: 0 },
     },
   ],
   seen: [
-    {type: mongoose.Schema.Types.ObjectId, ref: "products", required: false},
+    { type: mongoose.Schema.Types.ObjectId, ref: "products", required: false },
   ],
   unseen: [
-    {type: mongoose.Schema.Types.ObjectId, ref: "products", required: false},
+    { type: mongoose.Schema.Types.ObjectId, ref: "products", required: false },
   ],
 });
 
