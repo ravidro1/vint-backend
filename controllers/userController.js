@@ -28,12 +28,13 @@ const sendEmail = (subject, html, toEmail) => {
         text: "",
         html: html,
       })
-      .then((response) => {
-        // console.log({
-        //   message: "Email sent successfully",
-        //   response,
-        // });
-      });
+      // .then((response) => {
+      //   // console.log({
+      //   //   message: "Email sent successfully",
+      //   //   response,
+      //   // });
+      //   console.log("response", response);
+      // });
   } catch (error) {
     console.log({ message: "Error - Email", err: error });
   }
@@ -135,7 +136,6 @@ const RandomProducts = (times) => {
 /// (name,password,email,phone,username)
 exports.signUp = async (req, res) => {
   try {
-    console.log("yo");
     const body = req.body;
     const hashPassword = await bcrypt.hash(body.password, 10);
     // const randomProducts = await RandomProducts(10);
@@ -144,7 +144,6 @@ exports.signUp = async (req, res) => {
       password: hashPassword,
     });
     // console.log(newUser);
-
     newUser
       .save()
       .then((user) => {
@@ -170,6 +169,8 @@ exports.signUp = async (req, res) => {
             else {
               console.log({ message: "Verification Code sent successfully" });
             }
+          }).catch((error) => {
+            res.status(500).json({ message: "Error Email Save", error });
           });
 
           Product.find({})
@@ -198,14 +199,20 @@ exports.signUp = async (req, res) => {
                 .status(500)
                 .json({ message: "Error - productList", err });
             });
+            
 
           res.status(200).json({ message: "User Created" });
         }
       })
       .catch((error) => {
+        console.log({ message: "Error signing up", error });
+
         res.status(500).json({ message: "Error signing up", error });
+
+
       });
   } catch (error) {
+    console.log({ message: "Error signing up", error });
     res.status(500).json({ message: "Error signing up", error });
   }
 };
