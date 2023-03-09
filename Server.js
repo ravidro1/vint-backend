@@ -6,7 +6,6 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const PORT = 8081 || process.env.PORT;
 //routes
-const analyticsRouter = require("./routes/analytics");
 const userRouter = require("./routes/userRoutes");
 const chatRouter = require("./routes/chatRoures");
 const { socketConnection } = require("./socket");
@@ -29,7 +28,7 @@ app.use(cors());
 app.set("routes", __dirname + "/routes");
 
 // routes define
-app.use("/api/v1/analytics", analyticsRouter);
+
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/chat", chatRouter);
 
