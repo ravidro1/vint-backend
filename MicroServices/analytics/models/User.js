@@ -19,23 +19,13 @@ const user_schema = new mongoose.Schema({
 
   Chats: [{ ref: "chats", type: mongoose.Schema.Types.ObjectId }],
 
+  liked: [{ ref: "products", type: mongoose.Schema.Types.ObjectId }],
+
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 
   followersCounter: { type: Number, required: false, default: 0 },
 
   loginCounter: { type: Number, required: false, default: 0 },
-
-  profilePicture: {
-    type: String,
-    default:
-      "https://res.cloudinary.com/dz8ujmipu/image/upload/v1678291046/profile-pic-icon_t2wgpz.webp",
-  },
-
-  profilePicture: {
-    type: String,
-    default:
-      "https://res.cloudinary.com/dz8ujmipu/image/upload/v1678291046/profile-pic-icon_t2wgpz.webp",
-  },
 
   reviews: [
     {

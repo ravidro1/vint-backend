@@ -25,18 +25,6 @@ const user_schema = new mongoose.Schema({
 
   loginCounter: { type: Number, required: false, default: 0 },
 
-  profilePicture: {
-    type: String,
-    default:
-      "https://res.cloudinary.com/dz8ujmipu/image/upload/v1678291046/profile-pic-icon_t2wgpz.webp",
-  },
-
-  profilePicture: {
-    type: String,
-    default:
-      "https://res.cloudinary.com/dz8ujmipu/image/upload/v1678291046/profile-pic-icon_t2wgpz.webp",
-  },
-
   reviews: [
     {
       rank: { type: Number, required: false },

@@ -89,7 +89,7 @@ module.exports = {
         category: productCategory,
         onBid: onBid,
         condition: productCondition,
-        selller: userId,
+        seller: userId,
         tags: modifiedtags,
       }
     ).then((result) => {
@@ -97,7 +97,7 @@ module.exports = {
     });
   },
   Sold: (req, res) => {
-    const { productId } = req.body;
+    const { productId, review } = req.body;
     Products.findOneAndUpdate({ _id: productId }, { status: false }).then(
       (result) => {
         res.send(result);

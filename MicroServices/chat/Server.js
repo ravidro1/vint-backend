@@ -8,17 +8,26 @@ const mongoose = require("mongoose");
 const dateantime = require("date-and-time");
 const date = dateantime.format(new Date(), "DD/MM/YYYY");
 const time = dateantime.format(new Date(), "HH:mm");
-require("dotenv").config();
 const { chatController } = require("./controllers/chatController");
+// .env file
+require("dotenv").config();
 
+//mongo:
+mongoose
+    .connect(process.env.DB, {})
+    .then(() => {
+      console.log("DB connect");
+    })
+    .catch(() => {
+      console.log("DB connect Failed");
+    });
 //socket server config:
-app.use(cors({ origin: " http://localhost:19000" }));
+app.use(cors());
 require("events").EventEmitter.defaultMaxListeners = 15;
 
 //SOCKET-IO:
 
 // socket reacting to connection/disconnection
-exports.socketConnection = (socket) => {
   io.on("connection", (socket) => {
     console.log("a user connected");
 
@@ -30,5 +39,4 @@ exports.socketConnection = (socket) => {
   });
   http.listen(port, () => {
     console.log(`Socket.IO server running at http://localhost:${port}/`);
-  });
-};
+})
