@@ -31,14 +31,6 @@ app.use(cors());
 app.set("routes", __dirname + "/routes");
 
 // routes define
-
-const multer = require("multer");
-const upload = multer();
-const {cloudinaryUploadVideo} = require("./GlobaFunction/CloudinaryFunctions");
-const {
-  imageDetection,
-} = require("./GlobaFunction/ImageDetectionAndCompressFunctions");
-
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/chat", chatRouter);
 
