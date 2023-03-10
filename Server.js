@@ -1,3 +1,4 @@
+// .env file
 require("dotenv").config();
 
 // server imports:
@@ -12,8 +13,6 @@ const PORT = 8081 || process.env.PORT;
 //routes
 const userRouter = require("./routes/userRoutes");
 const chatRouter = require("./routes/chatRoures");
-const { socketConnection } = require("./socket");
-// .env file
 
 // DB connection
 mongoose
@@ -24,7 +23,7 @@ mongoose
   .catch(() => {
     console.log("DB connect Failed");
   });
-socketConnection();
+
 // essential server settings
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
@@ -33,7 +32,16 @@ app.set("routes", __dirname + "/routes");
 
 // routes define
 
+const multer = require("multer");
+const upload = multer();
+const {cloudinaryUploadVideo} = require("./GlobaFunction/CloudinaryFunctions");
+const {
+  imageDetection,
+} = require("./GlobaFunction/ImageDetectionAndCompressFunctions");
+
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/chat", chatRouter);
+app.post("/", upload.single("file"), cloudinaryUploadVideo);
+app.post("/d", upload.single("file"), imageDetection);
 
 app.listen(PORT, () => console.log("connected: " + PORT));

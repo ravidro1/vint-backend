@@ -6,7 +6,7 @@ const Product = require("../models/Product");
 const bcrypt = require("bcrypt");
 const jsonwebtoken = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
-const {cloudinaryUploadImage} = require("./CloudinaryController");
+const {cloudinaryUploadImage} = require("../GlobaFunction/CloudinaryFunctions");
 
 const sendEmail = (subject, html, toEmail) => {
   try {
@@ -21,23 +21,22 @@ const sendEmail = (subject, html, toEmail) => {
       },
     });
 
-    transporter
-      .sendMail({
-        from: "Vint System",
-        to: toEmail,
-        subject: subject,
-        text: "",
-        html: html,
-      })
-      // .then((response) => {
-      //   // console.log({
-      //   //   message: "Email sent successfully",
-      //   //   response,
-      //   // });
-      //   console.log("response", response);
-      // });
+    transporter.sendMail({
+      from: "Vint System",
+      to: toEmail,
+      subject: subject,
+      text: "",
+      html: html,
+    });
+    // .then((response) => {
+    //   // console.log({
+    //   //   message: "Email sent successfully",
+    //   //   response,
+    //   // });
+    //   console.log("response", response);
+    // });
   } catch (error) {
-    console.log({ message: "Error - Email", err: error });
+    console.log({message: "Error - Email", err: error});
   }
 };
 
@@ -58,18 +57,18 @@ const changePassword = async (req, res) => {
     const body = req.body;
     const newPassword = await bcrypt.hash(req.body.newPassword, 10);
 
-    User.findByIdAndUpdate(body.userID, { password: newPassword }).then(
+    User.findByIdAndUpdate(body.userID, {password: newPassword}).then(
       (user) => {
         if (!user.password) {
-          res.status(403).json({ message: "Error - changePassword" });
+          res.status(403).json({message: "Error - changePassword"});
         } else {
           console.log(newPassword);
-          res.status(200).json({ message: "Password changed" });
+          res.status(200).json({message: "Password changed"});
         }
       }
     );
   } catch (err) {
-    res.status(500).json({ message: "Error - change password", err: err });
+    res.status(500).json({message: "Error - change password", err: err});
   }
 };
 
@@ -78,7 +77,7 @@ const sendVerifyEmailAgain = (req, res) => {
     const body = req.body;
 
     User.findById(body.userID).then((user) => {
-      if (!user) return res.status(404).json({ message: "User not found" });
+      if (!user) return res.status(404).json({message: "User not found"});
       else {
         const VerificationCode = Math.round(Math.random() * 899999 + 100000);
 
@@ -97,15 +96,15 @@ const sendVerifyEmailAgain = (req, res) => {
           if (!emailVerify)
             return res
               .status(400)
-              .json({ message: "Failed To Send Verification Code" });
+              .json({message: "Failed To Send Verification Code"});
           else {
-            console.log({ message: "Verification Code sent successfully" });
+            console.log({message: "Verification Code sent successfully"});
 
             user.isActive = false;
             user
               .save()
               .then((user) => {
-                res.status(200).send({ message: "User Updated successfully" });
+                res.status(200).send({message: "User Updated successfully"});
               })
               .catch((err) => {
                 return res.status(500).json({
@@ -118,7 +117,7 @@ const sendVerifyEmailAgain = (req, res) => {
       }
     });
   } catch (err) {
-    res.status(500).json({ message: "Error - sendVerifyEmailAgain", err: err });
+    res.status(500).json({message: "Error - sendVerifyEmailAgain", err: err});
   }
 };
 
@@ -148,7 +147,7 @@ exports.signUp = async (req, res) => {
     newUser
       .save()
       .then((user) => {
-        if (!user) res.status(403).json({ message: "User Creation Failed" });
+        if (!user) res.status(403).json({message: "User Creation Failed"});
         else {
           const VerificationCode = Math.round(Math.random() * 899999 + 100000);
 
@@ -162,83 +161,83 @@ exports.signUp = async (req, res) => {
             userID: user._id,
             code: VerificationCode,
           });
-          newEmailVerify.save().then((emailVerify) => {
-            if (!emailVerify)
-              return res
-                .status(400)
-                .json({ message: "Failed To Send Verification Code" });
-            else {
-              console.log({ message: "Verification Code sent successfully" });
-            }
-          }).catch((error) => {
-            res.status(500).json({ message: "Error Email Save", error });
-          });
+          newEmailVerify
+            .save()
+            .then((emailVerify) => {
+              if (!emailVerify)
+                return res
+                  .status(400)
+                  .json({message: "Failed To Send Verification Code"});
+              else {
+                console.log({message: "Verification Code sent successfully"});
+              }
+            })
+            .catch((error) => {
+              res.status(500).json({message: "Error Email Save", error});
+            });
 
           Product.find({})
             .then((productList) => {
               if (!productList)
                 return res
                   .status(403)
-                  .json({ message: "Error - ProductList null" });
+                  .json({message: "Error - ProductList null"});
               else {
-                const newAnalytics = new Analytics({ user_id: user._id });
+                const newAnalytics = new Analytics({user_id: user._id});
                 newAnalytics.unseen = productList;
                 newAnalytics
                   .save()
                   .then((analytics) => {
-                    console.log({ message: "Analytics saved successfully" });
+                    console.log({message: "Analytics saved successfully"});
                   })
                   .catch((err) => {
                     return res
                       .status(500)
-                      .json({ message: "Error - saving analytics", err });
+                      .json({message: "Error - saving analytics", err});
                   });
               }
             })
             .catch((err) => {
               return res
                 .status(500)
-                .json({ message: "Error - productList", err });
+                .json({message: "Error - productList", err});
             });
-            
 
-          res.status(200).json({ message: "User Created" });
+          res.status(200).json({message: "User Created"});
         }
       })
       .catch((error) => {
-        console.log({ message: "Error signing up", error });
+        console.log({message: "Error signing up", error});
 
-        res.status(500).json({ message: "Error signing up", error });
-
-
+        res.status(500).json({message: "Error signing up", error});
       });
   } catch (error) {
-    console.log({ message: "Error signing up", error });
-    res.status(500).json({ message: "Error signing up", error });
+    console.log({message: "Error signing up", error});
+    res.status(500).json({message: "Error signing up", error});
   }
 };
 
 ////// (userID, code)
 exports.verifyEmail = (req, res) => {
   try {
-    EmailVerify.findOne({ userID: req.body.userID }).then((emailVerify) => {
+    EmailVerify.findOne({userID: req.body.userID}).then((emailVerify) => {
       if (!emailVerify)
-        res.status(403).json({ message: "emailVerify not found" });
+        res.status(403).json({message: "emailVerify not found"});
       else {
         if (req.body.code == emailVerify.code.toString()) {
-          EmailVerify.findOneAndDelete({ userID: req.body.userID }).catch(
+          EmailVerify.findOneAndDelete({userID: req.body.userID}).catch(
             (err) => {
               return res
                 .status(500)
-                .json({ message: "emailVerify - delete failed", err });
+                .json({message: "emailVerify - delete failed", err});
             }
           );
 
-          User.findByIdAndUpdate(req.body.userID, { isActive: true }).catch(
+          User.findByIdAndUpdate(req.body.userID, {isActive: true}).catch(
             (err) => {
               return res
                 .status(500)
-                .json({ message: "User Update - Update failed", err });
+                .json({message: "User Update - Update failed", err});
             }
           );
 
@@ -255,39 +254,36 @@ exports.verifyEmail = (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ message: "Error - verifyEmail", err: error });
+    res.status(500).json({message: "Error - verifyEmail", err: error});
   }
 };
 
 /////// (username, password)
 exports.login = (req, res) => {
   try {
-    User.findOne({ username: req.body.username }).then((user) => {
-      if (!user) res.status(400).json({ message: "User not found" });
+    User.findOne({username: req.body.username}).then((user) => {
+      if (!user) res.status(400).json({message: "User not found"});
       else {
-        const token = jsonwebtoken.sign(
-          { id: user._id },
-          process.env.JWT_TOKEN
-        );
+        const token = jsonwebtoken.sign({id: user._id}, process.env.JWT_TOKEN);
 
         bcrypt.compare(req.body.password, user.password).then((password) => {
           if (!password) {
-            res.status(400).json({ message: "Password incorrect" });
+            res.status(400).json({message: "Password incorrect"});
           } else {
             User.findByIdAndUpdate(user._id, {
               loginCounter: user.loginCounter + 1,
             }).catch(() => {
               return res
                 .status(403)
-                .json({ message: "login - User Update Failed" });
+                .json({message: "login - User Update Failed"});
             });
-            res.status(200).json({ message: "User Logged in", token });
+            res.status(200).json({message: "User Logged in", token});
           }
         });
       }
     });
   } catch (err) {
-    res.status(500).json({ message: "Error - login", err: err });
+    res.status(500).json({message: "Error - login", err: err});
   }
 };
 
@@ -295,18 +291,16 @@ exports.login = (req, res) => {
 exports.changeEmail = (req, res) => {
   try {
     const body = req.body;
-    User.findByIdAndUpdate(body.userID, { email: body.newEmail }).then(
-      (user) => {
-        if (!user) {
-          res.status(404).json({ message: "Change Email Faild", err });
-        } else {
-          sendVerifyEmailAgain(req, res);
-          // res.status(200).json({message: "Change Email"});
-        }
+    User.findByIdAndUpdate(body.userID, {email: body.newEmail}).then((user) => {
+      if (!user) {
+        res.status(404).json({message: "Change Email Faild", err});
+      } else {
+        sendVerifyEmailAgain(req, res);
+        // res.status(200).json({message: "Change Email"});
       }
-    );
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error - changeEmail", err: error });
+    res.status(500).json({message: "Error - changeEmail", err: error});
   }
 };
 
@@ -315,8 +309,8 @@ exports.forgotPassword = (req, res) => {
   try {
     const body = req.body;
 
-    User.findOne({ username: body.username }).then((user) => {
-      if (!user) res.status(404).json({ message: "Can't Find User" });
+    User.findOne({username: body.username}).then((user) => {
+      if (!user) res.status(404).json({message: "Can't Find User"});
       else {
         const newPassword = passwordGenerator(8);
         sendEmail(
@@ -327,7 +321,7 @@ exports.forgotPassword = (req, res) => {
         );
 
         changePassword(
-          { body: { userID: user._id, newPassword: newPassword } },
+          {body: {userID: user._id, newPassword: newPassword}},
           res
         );
 
@@ -335,7 +329,7 @@ exports.forgotPassword = (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ message: "Error - forgotPassword", err: error });
+    res.status(500).json({message: "Error - forgotPassword", err: error});
   }
 };
 
@@ -343,7 +337,7 @@ exports.forgotPassword = (req, res) => {
 exports.deleteAccount = (req, res) => {
   try {
     User.findByIdAndDelete(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({ message: "User not found" });
+      if (!user) res.status(404).json({message: "User not found"});
       else {
         sendEmail(
           "Account Deleted",
@@ -351,11 +345,11 @@ exports.deleteAccount = (req, res) => {
           <div> <strong> Vint System </strong> </div>`,
           user.email
         );
-        res.status(200).json({ message: "User deleted" });
+        res.status(200).json({message: "User deleted"});
       }
     });
   } catch (error) {
-    res.status(500).json({ message: "Error - Delete Account", err: error });
+    res.status(500).json({message: "Error - Delete Account", err: error});
   }
 };
 
@@ -385,24 +379,24 @@ exports.changeProfilePicture = async (req, res) => {
 exports.getWishList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({ message: "User not found" });
+      if (!user) res.status(404).json({message: "User not found"});
       else {
         user.populate("WishList").then((populateUser) => {
           res
             .status(200)
-            .json({ message: "wish list", wishList: populateUser.wishList });
+            .json({message: "wish list", wishList: populateUser.wishList});
         });
       }
     });
   } catch (error) {
-    res.status(500).json({ message: "Error - getWishList", err: error });
+    res.status(500).json({message: "Error - getWishList", err: error});
   }
 };
 
 exports.addToWishList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({ message: "User not found" });
+      if (!user) res.status(404).json({message: "User not found"});
       else {
         user?.update({
           WishList: [...user.WishList, req.body.newItemWishList],
@@ -410,14 +404,14 @@ exports.addToWishList = (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ message: "Error - getWishList", err: error });
+    res.status(500).json({message: "Error - getWishList", err: error});
   }
 };
 
 exports.removeFromWishList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({ message: "User not found" });
+      if (!user) res.status(404).json({message: "User not found"});
       else {
         user.update({
           WishList: [
@@ -429,7 +423,7 @@ exports.removeFromWishList = (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ message: "Error - getWishList", err: error });
+    res.status(500).json({message: "Error - getWishList", err: error});
   }
 };
 
@@ -437,7 +431,7 @@ exports.removeFromWishList = (req, res) => {
 exports.addProductToUserProductsList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({ message: "User not found" });
+      if (!user) res.status(404).json({message: "User not found"});
       else {
         user.update({
           userProducts: [...user.userProducts, req.body.newProduct],
@@ -447,14 +441,14 @@ exports.addProductToUserProductsList = (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Error - addProductToUserProductsList", err: error });
+      .json({message: "Error - addProductToUserProductsList", err: error});
   }
 };
 
 exports.removeProductFromUserProductsList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({ message: "User not found" });
+      if (!user) res.status(404).json({message: "User not found"});
       else {
         user.update({
           userProducts: [
@@ -476,7 +470,7 @@ exports.removeProductFromUserProductsList = (req, res) => {
 exports.getUserProductsList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({ message: "User not found" });
+      if (!user) res.status(404).json({message: "User not found"});
       else {
         user.populate("userProducts").then((populateUser) => {
           res.status(200).json({
@@ -487,9 +481,7 @@ exports.getUserProductsList = (req, res) => {
       }
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error - getUserProductsList", err: error });
+    res.status(500).json({message: "Error - getUserProductsList", err: error});
   }
 };
 
@@ -498,7 +490,7 @@ exports.getUserProductsList = (req, res) => {
 exports.addSellerToFollowingList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({ message: "User not found" });
+      if (!user) res.status(404).json({message: "User not found"});
       else {
         user.update({
           following: [...user.following, req.body.newFollowingItem],
@@ -508,14 +500,14 @@ exports.addSellerToFollowingList = (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Error - addSellerToFollowingList", err: error });
+      .json({message: "Error - addSellerToFollowingList", err: error});
   }
 };
 
 exports.removeSellerFromFollowingList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({ message: "User not found" });
+      if (!user) res.status(404).json({message: "User not found"});
       else {
         user.update({
           following: [
@@ -529,14 +521,14 @@ exports.removeSellerFromFollowingList = (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Error - removeSellerFromFollowingList", err: error });
+      .json({message: "Error - removeSellerFromFollowingList", err: error});
   }
 };
 
 exports.getFollowingList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({ message: "User not found" });
+      if (!user) res.status(404).json({message: "User not found"});
       else {
         user?.populate("following").then((populateUser) => {
           res.status(200).json({
@@ -547,7 +539,7 @@ exports.getFollowingList = (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ message: "Error - getFollowingList", err: error });
+    res.status(500).json({message: "Error - getFollowingList", err: error});
   }
 };
 

@@ -1,6 +1,4 @@
 const express = require("express");
-const router = express.Router();
-const upload = require("./uploadMiddlewire");
 const TeachableMachine = require("@sashido/teachablemachine-node");
 const {createCanvas, loadImage} = require("canvas");
 const sharp = require("sharp");
@@ -10,10 +8,13 @@ const MAX_HEIGHT = 4096;
 const MIME_TYPE = "image/jpeg";
 const QUALITY = 3;
 
+const model = new TeachableMachine({
+  modelUrl: process.env.IMAGE_DETECTION,
+});
+
 const compressImage = async (file) => {
   try {
     const imgPngFormat = await sharp(file.buffer).toFormat("png").toBuffer();
-
     const img = await loadImage(imgPngFormat);
     const [newWidth, newHeight] = calculateSize(img, MAX_WIDTH, MAX_HEIGHT);
     const canvas = createCanvas(newWidth, newHeight);
@@ -28,28 +29,48 @@ const compressImage = async (file) => {
   }
 };
 
-const model = new TeachableMachine({
-  modelUrl: process.env.IMAGE_DETECTION,
-});
+const calculateSize = (img, maxWidth, maxHeight) => {
+  let width = img.width;
+  let height = img.height;
 
-const imageDetection = async (req, res) => {
-  if (!req.file) {
+  // calculate the width and height, constraining the proportions
+  if (width > height) {
+    if (width > maxWidth) {
+      width = maxWidth;
+      height = Math.round((height * maxWidth) / width);
+    }
+  } else {
+    if (height > maxHeight) {
+      width = Math.round((width * maxHeight) / height);
+      height = maxHeight;
+    }
+  }
+  return [width, height];
+};
+
+exports.imageDetection = async (req, res) => {
+  const file = req.file;
+  console.log(1);
+  if (!file) {
     res.status(401).json({error: "Please provide an image"});
   }
-
   console.log("Got the file");
+  console.log(2);
 
-  const compressBuffer = await compressImage(req.file);
+  const compressBuffer = await compressImage(file);
+  console.log(3);
 
   const compressedImageDataUrl =
     `data:${MIME_TYPE};base64,` + compressBuffer.toString("base64");
+  console.log(4);
 
   return model
     .classify({
       imageUrl: compressedImageDataUrl,
     })
     .then((predictions) => {
-      res.json(predictions);
+      console.log(5);
+      res.status(200).json({massage: "Predictions", predictions});
       console.log(predictions);
     })
     .catch((e) => {
@@ -57,4 +78,4 @@ const imageDetection = async (req, res) => {
     });
 };
 
-module.exports = router;
+exports.compressImage = compressImage;
