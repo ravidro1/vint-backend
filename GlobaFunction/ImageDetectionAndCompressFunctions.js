@@ -48,28 +48,24 @@ const calculateSize = (img, maxWidth, maxHeight) => {
   return [width, height];
 };
 
-exports.imageDetection = async (req, res) => {
-  const file = req.file;
-  console.log(1);
+exports.imageDetection = async (file) => {
+  // const file = req.file;
+
   if (!file) {
     res.status(401).json({error: "Please provide an image"});
   }
   console.log("Got the file");
-  console.log(2);
 
   const compressBuffer = await compressImage(file);
-  console.log(3);
 
   const compressedImageDataUrl =
     `data:${MIME_TYPE};base64,` + compressBuffer.toString("base64");
-  console.log(4);
 
   return model
     .classify({
       imageUrl: compressedImageDataUrl,
     })
     .then((predictions) => {
-      console.log(5);
       res.status(200).json({massage: "Predictions", predictions});
       console.log(predictions);
     })

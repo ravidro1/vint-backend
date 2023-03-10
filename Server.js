@@ -41,7 +41,6 @@ const {
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/chat", chatRouter);
-app.post("/", upload.single("file"), cloudinaryUploadVideo);
-app.post("/d", upload.single("file"), imageDetection);
+
 
 app.listen(PORT, () => console.log("connected: " + PORT));
