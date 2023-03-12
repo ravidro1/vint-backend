@@ -149,11 +149,11 @@ const RandomProducts = (times) => {
 };
 
 function SumSellers(userId) {
-  User.findOne({ _id: userId })
+  User.findOne({_id: userId})
     .populate("following")
     .then((seller) => {
       Analytics.find({
-        _id: { $in: [seller?.map((single) => single._id)] },
+        _id: {$in: [seller?.map((single) => single._id)]},
       }).then((sellersStatistics) => {
         let favSellers = [];
         sellersStatistics.map((singleSeller) => {
@@ -167,14 +167,14 @@ function SumSellers(userId) {
               });
             } else {
               check = true;
-              favSellers.push({ tag: tag.tag, score: 1 });
+              favSellers.push({tag: tag.tag, score: 1});
             }
             if (!check) {
-              favSellers.push({ tag: tag.tag, score: 1 });
+              favSellers.push({tag: tag.tag, score: 1});
             }
           });
         });
-        Analytics.findOne({ _id: userId }).then((analytics) => {
+        Analytics.findOne({_id: userId}).then((analytics) => {
           favSellers.sort((a, b) => a.score - b.score);
           analytics.sellerPreferences = favSellers;
           let sellerSuggestions = [];
@@ -254,13 +254,13 @@ exports.signUp = async (req, res) => {
               if (!emailVerify)
                 return res
                   .status(400)
-                  .json({ message: "Failed To Send Verification Code" });
+                  .json({message: "Failed To Send Verification Code"});
               else {
-                console.log({ message: "Verification Code sent successfully" });
+                console.log({message: "Verification Code sent successfully"});
               }
             })
             .catch((error) => {
-              res.status(500).json({ message: "Error Email Save", error });
+              res.status(500).json({message: "Error Email Save", error});
             });
 
           Product.find({})
@@ -296,9 +296,7 @@ exports.signUp = async (req, res) => {
       .catch((error) => {
         console.log({message: "Error signing up", error});
 
-        res.status(500).json({ message: "Error signing up", error });
-
-
+        res.status(500).json({message: "Error signing up", error});
       });
   } catch (error) {
     console.log({message: "Error signing up", error});
@@ -410,8 +408,8 @@ exports.forgotPassword = (req, res) => {
             .status(403)
             .json({message: "This Mail Address Is Not Valid!!!"});
 
-        passwordGenerator(8);
-        const emailSentSuccessfully = sendEmail(
+        const newPassword = passwordGenerator(8);
+        sendEmail(
           "Forgot Password",
           `<div> Your New Password Is: <strong>${newPassword}</strong> You Can Change This Password</div>
           <div> <strong> Vint System </strong> </div>`,
@@ -593,7 +591,7 @@ exports.addSellerToFollowingList = (req, res) => {
         user.update({
           following: [...user.following, req.body.newFollowingItem],
         });
-        res.json({ message: "updated" });
+        res.json({message: "updated"});
         try {
           SumSellers(req.body.userID);
         } catch (error) {
