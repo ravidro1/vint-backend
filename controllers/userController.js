@@ -148,6 +148,72 @@ const RandomProducts = (times) => {
   });
 };
 
+function SumSellers(userId) {
+  User.findOne({ _id: userId })
+    .populate("following")
+    .then((seller) => {
+      Analytics.find({
+        _id: { $in: [seller?.map((single) => single._id)] },
+      }).then((sellersStatistics) => {
+        let favSellers = [];
+        sellersStatistics.map((singleSeller) => {
+          singleSeller.myPublishedProductsSum.map((tag) => {
+            let check = false;
+            if (favSellers.length > 0) {
+              favSellers.map((favTag) => {
+                if (favTag.tag === tag.tag) {
+                  favTag.score += tag.score; //check for better option
+                }
+              });
+            } else {
+              check = true;
+              favSellers.push({ tag: tag.tag, score: 1 });
+            }
+            if (!check) {
+              favSellers.push({ tag: tag.tag, score: 1 });
+            }
+          });
+        });
+        Analytics.findOne({ _id: userId }).then((analytics) => {
+          favSellers.sort((a, b) => a.score - b.score);
+          analytics.sellerPreferences = favSellers;
+          let sellerSuggestions = [];
+          Analytics.find().then((users) => {
+            users.map((user) => {
+              //here compare each seller to the user preference.
+              let singleSellerArray = [];
+              user.myPublishedProductsSum.map((tag) => {
+                // seller avg tag score
+                analytics.sellerPreferences.map((favTag) => {
+                  // user avg fav seller tag score
+                  if (tag.tag === favTag.tag) {
+                    singleSellerArray.push({
+                      tag: tag.tag,
+                      score: favTag.score,
+                    });
+                  }
+                });
+              });
+              function getTheSum(sellerArray) {
+                let sum = 0;
+                sellerArray.forEach((tag) => {
+                  sum = sum + tag.score;
+                });
+                return sum;
+              }
+              sellerSuggestions.push({
+                seller: user._id,
+                score: getTheSum(singleSellerArray),
+              });
+            });
+          });
+          sellerSuggestions.sort((a, b) => a.score - b.score);
+          analytics.suggestedSellers = sellerSuggestions;
+          analytics?.save();
+        });
+      });
+    });
+}
 /// (name,password,email,phone,username)
 exports.signUp = async (req, res) => {
   try {
@@ -188,13 +254,13 @@ exports.signUp = async (req, res) => {
               if (!emailVerify)
                 return res
                   .status(400)
-                  .json({message: "Failed To Send Verification Code"});
+                  .json({ message: "Failed To Send Verification Code" });
               else {
-                console.log({message: "Verification Code sent successfully"});
+                console.log({ message: "Verification Code sent successfully" });
               }
             })
             .catch((error) => {
-              res.status(500).json({message: "Error Email Save", error});
+              res.status(500).json({ message: "Error Email Save", error });
             });
 
           Product.find({})
@@ -230,7 +296,9 @@ exports.signUp = async (req, res) => {
       .catch((error) => {
         console.log({message: "Error signing up", error});
 
-        res.status(500).json({message: "Error signing up", error});
+        res.status(500).json({ message: "Error signing up", error });
+
+
       });
   } catch (error) {
     console.log({message: "Error signing up", error});
@@ -525,6 +593,12 @@ exports.addSellerToFollowingList = (req, res) => {
         user.update({
           following: [...user.following, req.body.newFollowingItem],
         });
+        res.json({ message: "updated" });
+        try {
+          SumSellers(req.body.userID);
+        } catch (error) {
+          console.log(error);
+        }
       }
     });
   } catch (error) {
@@ -546,6 +620,11 @@ exports.removeSellerFromFollowingList = (req, res) => {
             ),
           ],
         });
+        try {
+          SumSellers(req.body.userID);
+        } catch (error) {
+          console.log(error);
+        }
       }
     });
   } catch (error) {

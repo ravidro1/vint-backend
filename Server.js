@@ -12,7 +12,7 @@ const PORT = 8081 || process.env.PORT;
 
 //routes
 const userRouter = require("./routes/userRoutes");
-const chatRouter = require("./routes/chatRoures");
+
 
 // DB connection
 mongoose
@@ -23,16 +23,12 @@ mongoose
   .catch(() => {
     console.log("DB connect Failed");
   });
-
 // essential server settings
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
-app.use(cors());
 app.set("routes", __dirname + "/routes");
-
+app.use(cors());
 // routes define
 app.use("/api/v1/user", userRouter);
-app.use("/api/v1/chat", chatRouter);
 
 
 app.listen(PORT, () => console.log("connected: " + PORT));
