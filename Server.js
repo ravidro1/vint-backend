@@ -24,9 +24,11 @@ mongoose
     console.log("DB connect Failed");
   });
 // essential server settings
+
 app.use(express.json());
 app.set("routes", __dirname + "/routes");
 app.use(cors());
+
 // routes define
 app.use("/api/v1/user", userRouter);
 
