@@ -136,84 +136,6 @@ const sendVerifyEmailAgain = (req, res) => {
   }
 };
 
-const RandomProducts = (times) => {
-  let randomProducts;
-  return Product.find().then((products) => {
-    for (let i = 0; i < times; i++) {
-      const randomProduct =
-        products[Math.floor(Math.random() * products.length)];
-      randomProducts.push(randomProduct);
-    }
-    return randomProducts;
-  });
-};
-
-function SumSellers(userId) {
-  User.findOne({_id: userId})
-    .populate("following")
-    .then((seller) => {
-      Analytics.find({
-        _id: {$in: [seller?.map((single) => single._id)]},
-      }).then((sellersStatistics) => {
-        let favSellers = [];
-        sellersStatistics.map((singleSeller) => {
-          singleSeller.myPublishedProductsSum.map((tag) => {
-            let check = false;
-            if (favSellers.length > 0) {
-              favSellers.map((favTag) => {
-                if (favTag.tag === tag.tag) {
-                  favTag.score += tag.score; //check for better option
-                }
-              });
-            } else {
-              check = true;
-              favSellers.push({tag: tag.tag, score: 1});
-            }
-            if (!check) {
-              favSellers.push({tag: tag.tag, score: 1});
-            }
-          });
-        });
-        Analytics.findOne({_id: userId}).then((analytics) => {
-          favSellers.sort((a, b) => a.score - b.score);
-          analytics.sellerPreferences = favSellers;
-          let sellerSuggestions = [];
-          Analytics.find().then((users) => {
-            users.map((user) => {
-              //here compare each seller to the user preference.
-              let singleSellerArray = [];
-              user.myPublishedProductsSum.map((tag) => {
-                // seller avg tag score
-                analytics.sellerPreferences.map((favTag) => {
-                  // user avg fav seller tag score
-                  if (tag.tag === favTag.tag) {
-                    singleSellerArray.push({
-                      tag: tag.tag,
-                      score: favTag.score,
-                    });
-                  }
-                });
-              });
-              function getTheSum(sellerArray) {
-                let sum = 0;
-                sellerArray.forEach((tag) => {
-                  sum = sum + tag.score;
-                });
-                return sum;
-              }
-              sellerSuggestions.push({
-                seller: user._id,
-                score: getTheSum(singleSellerArray),
-              });
-            });
-          });
-          sellerSuggestions.sort((a, b) => a.score - b.score);
-          analytics.suggestedSellers = sellerSuggestions;
-          analytics?.save();
-        });
-      });
-    });
-}
 /// (name,password,email,phone,username)
 exports.signUp = async (req, res) => {
   try {
@@ -290,7 +212,14 @@ exports.signUp = async (req, res) => {
                 .json({message: "Error - productList", err});
             });
 
-          res.status(200).json({message: "User Created", userID: user._id});
+          const token = jsonwebtoken.sign(
+            {id: user._id},
+            process.env.JWT_TOKEN
+          );
+
+          res
+            .status(200)
+            .json({message: "User Created", userID: user._id, token});
         }
       })
       .catch((error) => {
@@ -656,8 +585,91 @@ exports.getFollowingList = (req, res) => {
   }
 };
 
+const verifyToken = (req, res) => {};
+
 /////// (userID, email)
 exports.sendVerifyEmailAgain = sendVerifyEmailAgain;
 
 ////// (userID, newPassword)
 exports.changePassword = changePassword;
+
+
+
+const RandomProducts = (times) => {
+  let randomProducts;
+  return Product.find().then((products) => {
+    for (let i = 0; i < times; i++) {
+      const randomProduct =
+        products[Math.floor(Math.random() * products.length)];
+      randomProducts.push(randomProduct);
+    }
+    return randomProducts;
+  });
+};
+
+function SumSellers(userId) {
+  User.findOne({_id: userId})
+    .populate("following")
+    .then((seller) => {
+      Analytics.find({
+        _id: {$in: [seller?.map((single) => single._id)]},
+      }).then((sellersStatistics) => {
+        let favSellers = [];
+        sellersStatistics.map((singleSeller) => {
+          singleSeller.myPublishedProductsSum.map((tag) => {
+            let check = false;
+            if (favSellers.length > 0) {
+              favSellers.map((favTag) => {
+                if (favTag.tag === tag.tag) {
+                  favTag.score += tag.score; //check for better option
+                }
+              });
+            } else {
+              check = true;
+              favSellers.push({tag: tag.tag, score: 1});
+            }
+            if (!check) {
+              favSellers.push({tag: tag.tag, score: 1});
+            }
+          });
+        });
+        Analytics.findOne({_id: userId}).then((analytics) => {
+          favSellers.sort((a, b) => a.score - b.score);
+          analytics.sellerPreferences = favSellers;
+          let sellerSuggestions = [];
+          Analytics.find().then((users) => {
+            users.map((user) => {
+              //here compare each seller to the user preference.
+              let singleSellerArray = [];
+              user.myPublishedProductsSum.map((tag) => {
+                // seller avg tag score
+                analytics.sellerPreferences.map((favTag) => {
+                  // user avg fav seller tag score
+                  if (tag.tag === favTag.tag) {
+                    singleSellerArray.push({
+                      tag: tag.tag,
+                      score: favTag.score,
+                    });
+                  }
+                });
+              });
+              function getTheSum(sellerArray) {
+                let sum = 0;
+                sellerArray.forEach((tag) => {
+                  sum = sum + tag.score;
+                });
+                return sum;
+              }
+              sellerSuggestions.push({
+                seller: user._id,
+                score: getTheSum(singleSellerArray),
+              });
+            });
+          });
+          sellerSuggestions.sort((a, b) => a.score - b.score);
+          analytics.suggestedSellers = sellerSuggestions;
+          analytics?.save();
+        });
+      });
+    });
+}
