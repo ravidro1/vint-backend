@@ -7,8 +7,7 @@ const mongoose = require("mongoose");
 const PORT = 8081 || process.env.PORT;
 //routes
 const userRouter = require("./routes/userRoutes");
-const chatRouter = require("./routes/chatRoures");
-const { socketConnection } = require("./socket");
+
 // .env file
 require("dotenv").config();
 
@@ -30,6 +29,5 @@ app.set("routes", __dirname + "/routes");
 // routes define
 
 app.use("/api/v1/user", userRouter);
-app.use("/api/v1/chat", chatRouter);
 
 app.listen(PORT, () => console.log("connected: " + PORT));
