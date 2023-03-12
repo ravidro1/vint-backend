@@ -290,7 +290,7 @@ exports.signUp = async (req, res) => {
                 .json({message: "Error - productList", err});
             });
 
-          res.status(200).json({message: "User Created"});
+          res.status(200).json({message: "User Created", userID: user._id});
         }
       })
       .catch((error) => {
@@ -364,7 +364,12 @@ exports.login = (req, res) => {
                 .status(403)
                 .json({message: "login - User Update Failed"});
             });
-            res.status(200).json({message: "User Logged in", user, token});
+            res.status(200).json({
+              message: "User Logged in",
+              userID: user._id,
+              isActive: user.isActive,
+              token,
+            });
           }
         });
       }
