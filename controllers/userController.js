@@ -364,7 +364,7 @@ exports.login = (req, res) => {
                 .status(403)
                 .json({message: "login - User Update Failed"});
             });
-            res.status(200).json({message: "User Logged in", token});
+            res.status(200).json({message: "User Logged in", user, token});
           }
         });
       }
