@@ -11,6 +11,38 @@ function GetTags(tags, name, category, description) {
   return removeDuplicates(myArray);
 }
 
+function SumMyProducts(userId) {
+  try {
+    User.findOne({ _id: userId })
+      .populate("userProducts")
+      .then((products) => {
+        const tags = [];
+        products?.map((product) => {
+          product.tags.map((tag) => {
+            let exist = false;
+            tags.map((external_Tag) => {
+              if (external_Tag.tag === tag) {
+                exist = true;
+                external_Tag.score++;
+                return;
+              }
+            });
+            if (!exist) {
+              tags.push({ tag: tag, score: 1 });
+            }
+          });
+        });
+        tags.sort((a, b) => a.score - b.score);
+        Analytics.findOne({ _id: userId }).then((userAnalytics) => {
+          userAnalytics.myPublishedProductsSum = tags;
+          userAnalytics?.save();
+        });
+      });
+  } catch (err) {
+    console.log(err);
+  }
+}
+
 module.exports = {
   CreateProduct: (req, res) => {
     const {
@@ -43,6 +75,7 @@ module.exports = {
     });
     product?.save();
     res.send(product);
+    SumMyProducts(userId);
   },
   Rabid: (req, res) => {
     const { bid, productId } = req.body;

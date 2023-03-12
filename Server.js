@@ -20,12 +20,10 @@ mongoose
   .catch(() => {
     console.log("DB connect Failed");
   });
-socketConnection();
 // essential server settings
 app.use(express.json());
-app.use(cors());
 app.set("routes", __dirname + "/routes");
-
+app.use(cors());
 // routes define
 
 app.use("/api/v1/user", userRouter);
