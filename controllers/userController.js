@@ -8,13 +8,23 @@ const jsonwebtoken = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const {cloudinaryUploadImage} = require("../GlobaFunction/CloudinaryFunctions");
 
+const checkEmail = (toEmail) => {
+  if (!toEmail.endsWith("@gmail.com")) {
+    console.log("This Mail Address Is Not Valid!!!");
+    return false;
+  }
+  return true;
+};
+
 const sendEmail = (subject, html, toEmail) => {
   try {
+    if (!toEmail.endsWith("@gmail.com")) return;
+
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       service: "gmail",
       port: 465,
-      // secure: false, // true for 465, false for other ports
+      secure: true, // true for 465, false for other ports
       auth: {
         user: process.env.EMAIL,
         pass: process.env.EMAIL_PASSWORD,
@@ -75,6 +85,11 @@ const changePassword = async (req, res) => {
 const sendVerifyEmailAgain = (req, res) => {
   try {
     const body = req.body;
+
+    if (!checkEmail(body.email))
+      return res
+        .status(403)
+        .json({message: "This Mail Address Is Not Valid!!!"});
 
     User.findById(body.userID).then((user) => {
       if (!user) return res.status(404).json({message: "User not found"});
@@ -137,6 +152,12 @@ const RandomProducts = (times) => {
 exports.signUp = async (req, res) => {
   try {
     const body = req.body;
+
+    if (!checkEmail(body.email))
+      return res
+        .status(403)
+        .json({message: "This Mail Address Is Not Valid!!!"});
+
     const hashPassword = await bcrypt.hash(body.password, 10);
     // const randomProducts = await RandomProducts(10);
     const newUser = new User({
@@ -291,6 +312,12 @@ exports.login = (req, res) => {
 exports.changeEmail = (req, res) => {
   try {
     const body = req.body;
+
+    if (!checkEmail(body.newEmail))
+      return res
+        .status(403)
+        .json({message: "This Mail Address Is Not Valid!!!"});
+
     User.findByIdAndUpdate(body.userID, {email: body.newEmail}).then((user) => {
       if (!user) {
         res.status(404).json({message: "Change Email Faild", err});
@@ -307,13 +334,16 @@ exports.changeEmail = (req, res) => {
 /////////// (username)
 exports.forgotPassword = (req, res) => {
   try {
-    const body = req.body;
-
     User.findOne({username: body.username}).then((user) => {
       if (!user) res.status(404).json({message: "Can't Find User"});
       else {
-        const newPassword = passwordGenerator(8);
-        sendEmail(
+        if (!checkEmail(user.email))
+          return res
+            .status(403)
+            .json({message: "This Mail Address Is Not Valid!!!"});
+
+        passwordGenerator(8);
+        const emailSentSuccessfully = sendEmail(
           "Forgot Password",
           `<div> Your New Password Is: <strong>${newPassword}</strong> You Can Change This Password</div>
           <div> <strong> Vint System </strong> </div>`,
