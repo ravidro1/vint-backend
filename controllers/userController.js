@@ -400,6 +400,7 @@ exports.changeEmail = (req, res) => {
 /////////// (username)
 exports.forgotPassword = (req, res) => {
   try {
+    const body = req.body;
     User.findOne({username: body.username}).then((user) => {
       if (!user) res.status(404).json({message: "Can't Find User"});
       else {
