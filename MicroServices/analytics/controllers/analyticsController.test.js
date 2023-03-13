@@ -12,20 +12,17 @@ const {
   GetTag,
   SumSellers,
 } = require("./analytics_assest");
-
 //test when analytics updates
 test("get single user unseen products", async () => {
   const userId = "640df10ba218e7a354e1afeb";
   // returns undefined because analytics is not initialized
   expect(await GetUnseen(userId)).toEqual();
 }, 10000);
-
 test("add seen", async () => {
   //update when data arrive
   const productId = "640df10ba218e7a354";
   expect(await GetProductTags(productId)).toEqual([]);
 });
-
 // non dependent tests
 test("get single user seen products", async () => {
   const userId = "640df10ba218e7a354e1afeb";
