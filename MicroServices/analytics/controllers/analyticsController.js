@@ -3,7 +3,7 @@ const Products = require("../models/Product");
 const User = require("../models/User");
 
 function GetUnseen(userId) {
-  return Analytics.findOne({ userId: userId }).then((analytics) => {
+  return Analytics.findOne({userId: userId}).then((analytics) => {
     if (analytics) {
       return analytics?.unseen;
     }
@@ -21,14 +21,14 @@ function sortAndRemoveDuplicates(arr) {
         }
       });
       if (!check) {
-        clone.push({ value: arr[i], count: 1 });
+        clone.push({value: arr[i], count: 1});
       }
     }
   }
   return clone.sort((a, b) => a.count - b.count);
 }
 function GetSeen(userId) {
-  return Analytics.findOne({ userId: userId }).then((analytics) => {
+  return Analytics.findOne({userId: userId}).then((analytics) => {
     if (analytics) {
       return analytics?.seen;
     }
@@ -36,7 +36,7 @@ function GetSeen(userId) {
 }
 function AddSeen(userId, seen) {
   const divider = 3;
-  Analytics.findOne({ userId: userId }).then((analytics) => {
+  Analytics.findOne({userId: userId}).then((analytics) => {
     if (analytics) {
       const seenLength = analytics?.seen.length;
       const unseenLength = analytics?.unseen.length;
@@ -64,7 +64,7 @@ function AddSeen(userId, seen) {
   });
 }
 function GetProductTags(productId) {
-  return Products.findOne({ _id: productId }).then((product) => {
+  return Products.findOne({_id: productId}).then((product) => {
     if (product) {
       return product?.tags;
     }
@@ -94,7 +94,7 @@ function CalcSummary(userId, clicks, observers, liked) {
         check = true;
       }
       if (!sum.tag.includes(likeToClick)) {
-        sum.push({ tag: likeToClick, score: 10 });
+        sum.push({tag: likeToClick, score: 10});
       }
     });
     if (!check) {
@@ -111,7 +111,7 @@ function CalcSummary(userId, clicks, observers, liked) {
       });
     }
   });
-  Analytics.findOne({ userId: userId }).then((analytics) => {
+  Analytics.findOne({userId: userId}).then((analytics) => {
     analytics.sum = sum;
 
     analytics?.sum?.sort(GetScore);
@@ -133,7 +133,7 @@ function GetProductFromProductArray(productArr) {
 }
 function SortByTags(userId, products) {
   const Answer = [];
-  Analytics.findOne({ userId: userId }).then((analytics) => {
+  Analytics.findOne({userId: userId}).then((analytics) => {
     products.map((product) => {
       let matchRank = 0;
       analytics?.sum.map((tag) => {
@@ -141,7 +141,7 @@ function SortByTags(userId, products) {
           matchRank = matchRank + tag.score;
         }
       });
-      Answer.push({ product, score: matchRank });
+      Answer.push({product, score: matchRank});
     });
     // Answer.sort(GetScore);
     analytics.unseen = Answer.sort(GetScore);
@@ -150,11 +150,11 @@ function SortByTags(userId, products) {
   return Answer.sort(GetScore);
 }
 function SumSellers(userId) {
-  User.findOne({ _id: userId })
+  User.findOne({_id: userId})
     .populate("following")
     .then((seller) => {
       Analytics.find({
-        _id: { $in: [seller?.map((single) => single._id)] },
+        _id: {$in: [seller?.map((single) => single._id)]},
       }).then((sellersStatistics) => {
         let favSellers = [];
         sellersStatistics.map((singleSeller) => {
@@ -168,14 +168,14 @@ function SumSellers(userId) {
               });
             } else {
               check = true;
-              favSellers.push({ tag: tag.tag, score: 1 });
+              favSellers.push({tag: tag.tag, score: 1});
             }
             if (!check) {
-              favSellers.push({ tag: tag.tag, score: 1 });
+              favSellers.push({tag: tag.tag, score: 1});
             }
           });
         });
-        Analytics.findOne({ _id: userId }).then((analytics) => {
+        Analytics.findOne({_id: userId}).then((analytics) => {
           favSellers.sort((a, b) => a.score - b.score);
           analytics.sellerPreferences = favSellers;
           let sellerSuggestions = [];
@@ -216,7 +216,7 @@ function SumSellers(userId) {
     });
 }
 function GetRandomizedProducts(userId) {
-  return User.findOne({ userId: userId }).then((user) => {
+  return User.findOne({userId: userId}).then((user) => {
     if (user) {
       return user?.fastLoadProducts;
     }
@@ -226,15 +226,15 @@ function GetRandomizedProducts(userId) {
 module.exports = {
   GetFeed: async (req, res) => {
     try {
-      const { userId } = req.body;
+      const {userId} = req.body;
       let response;
-      User.findOne({ userId: userId }).then((user) => {
+      User.findOne({userId: userId}).then((user) => {
         if (user?.loginCounter <= 1) {
           response = user?.fastLoadProducts;
         }
       });
       if (response) {
-        Analytics.findOne({ userId: userId }).then((analytics) => {
+        Analytics.findOne({userId: userId}).then((analytics) => {
           response = analytics?.unseen;
         });
       }
@@ -252,7 +252,7 @@ module.exports = {
             return seen.productId !== product._id;
           });
         });
-        Analytics.findOne({ userId: userId }).then((analytics) => {
+        Analytics.findOne({userId: userId}).then((analytics) => {
           analytics.unseen = filteredProducts;
           analytics?.save();
         });
@@ -262,70 +262,68 @@ module.exports = {
     }
   },
   AddAnalytics: async (req, res) => {
-    const { userId, productsArr, seen } = req.body;
-    Analytics.findOne({ userId: userId }).then((userAnalytics) => {
-      Products.find({ _id: { $in: [productsArr.productId] } }).then(
-        (products) => {
-          products.map((product) => {
-            let tags = product.tags;
-            if (product.liked) {
-              userAnalytics?.liked.push(product.productId);
-              userAnalytics?.save().then(() => {
-                CalcSummary(
-                  userId,
-                  userAnalytics?.clicks,
-                  userAnalytics?.observer,
-                  userAnalytics?.liked
-                );
-              });
-            }
-            if (product.click) {
-              tags?.map((tag) => {
-                let check = false;
-                userAnalytics?.clicks.map((exist_tag) => {
-                  if (tag === exist_tag.tag) {
-                    check = true;
-                    exist_tag.score += 1;
-                  }
-                });
-                if (check) {
-                  userAnalytics?.clicks.push({ tag: tag, score: 1 });
+    const {userId, productsArr, seen} = req.body;
+    Analytics.findOne({userId: userId}).then((userAnalytics) => {
+      Products.find({_id: {$in: [productsArr.productId]}}).then((products) => {
+        products.map((product) => {
+          let tags = product.tags;
+          if (product.liked) {
+            userAnalytics?.liked.push(product.productId);
+            userAnalytics?.save().then(() => {
+              CalcSummary(
+                userId,
+                userAnalytics?.clicks,
+                userAnalytics?.observer,
+                userAnalytics?.liked
+              );
+            });
+          }
+          if (product.click) {
+            tags?.map((tag) => {
+              let check = false;
+              userAnalytics?.clicks.map((exist_tag) => {
+                if (tag === exist_tag.tag) {
+                  check = true;
+                  exist_tag.score += 1;
                 }
               });
-              userAnalytics?.save().then(() => {
-                CalcSummary(
-                  userId,
-                  userAnalytics?.clicks,
-                  userAnalytics?.observer,
-                  userAnalytics?.liked
-                );
-              });
-            }
-            if (product.observer > 0) {
-              tags.map((tag) => {
-                let check = false;
-                userAnalytics?.observer.map((exist_tag) => {
-                  if (tag === exist_tag.tag) {
-                    check = true;
-                    exist_tag.score += 1;
-                  }
-                });
-                if (check) {
-                  userAnalytics?.observer.push({ tag: tag, score: 1 });
+              if (check) {
+                userAnalytics?.clicks.push({tag: tag, score: 1});
+              }
+            });
+            userAnalytics?.save().then(() => {
+              CalcSummary(
+                userId,
+                userAnalytics?.clicks,
+                userAnalytics?.observer,
+                userAnalytics?.liked
+              );
+            });
+          }
+          if (product.observer > 0) {
+            tags.map((tag) => {
+              let check = false;
+              userAnalytics?.observer.map((exist_tag) => {
+                if (tag === exist_tag.tag) {
+                  check = true;
+                  exist_tag.score += 1;
                 }
               });
-              userAnalytics?.save().then(() => {
-                CalcSummary(
-                  userId,
-                  userAnalytics?.clicks,
-                  userAnalytics?.observer,
-                  userAnalytics?.liked
-                );
-              });
-            }
-          });
-        }
-      );
+              if (check) {
+                userAnalytics?.observer.push({tag: tag, score: 1});
+              }
+            });
+            userAnalytics?.save().then(() => {
+              CalcSummary(
+                userId,
+                userAnalytics?.clicks,
+                userAnalytics?.observer,
+                userAnalytics?.liked
+              );
+            });
+          }
+        });
+      });
       try {
         AddSeen(userId, GetProductFromProductArray(productsArr));
       } catch (e) {
@@ -335,7 +333,7 @@ module.exports = {
   },
   Search: async (req, res) => {
     try {
-      const { userId, input } = req.body;
+      const {userId, input} = req.body;
       const Answer = [];
       let highMatchProducts;
       let lowMatchProducts;
@@ -362,13 +360,13 @@ module.exports = {
     }
   },
   GetFollowingFeed: async (req, res) => {
-    const { userId } = req.body;
+    const {userId} = req.body;
     const productsArr = [];
     let answer;
-    User.findOne({ _id: userId }).then((user) => {
-      User.find({ _id: { $in: user?.following } }).then((followingSellers) => {
+    User.findOne({_id: userId}).then((user) => {
+      User.find({_id: {$in: user?.following}}).then((followingSellers) => {
         followingSellers.map((seller) => {
-          Products.find({ _id: { $in: seller?.products } }).then((products) => {
+          Products.find({_id: {$in: seller?.products}}).then((products) => {
             productsArr.push(SortByTags(seller._id, products));
           });
         });
@@ -378,11 +376,11 @@ module.exports = {
     res.json(answer);
   },
   MyTown: async (req, res) => {
-    const { town } = req.body;
+    const {town} = req.body;
     let allLiked = [];
     let clone = [];
-    User.find({ location: town }).then((users) => {
-      Analytics.find({ userId: { $in: users.map((user) => user._id) } }).then(
+    User.find({location: town}).then((users) => {
+      Analytics.find({userId: {$in: users.map((user) => user._id)}}).then(
         (allCurrectUsers) => {
           allCurrectUsers.map((user) => {
             allLiked.push(user.liked);
