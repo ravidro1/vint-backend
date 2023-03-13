@@ -13,6 +13,7 @@ const {
   forgotPassword,
   sendVerifyEmailAgain,
   changeProfilePicture,
+  verifyToken,
 
   getWishList,
   removeFromWishList,
@@ -40,6 +41,8 @@ router.post(
   upload.single("file"),
   changeProfilePicture
 );
+
+router.post("/verifyToken", verifyToken);
 
 router.post("/getWishList", getWishList);
 router.post("/removeFromWishList", removeFromWishList);
