@@ -301,7 +301,7 @@ exports.login = (req, res) => {
               userID: user._id,
               isActive: user.isActive,
               token,
-              email: body.email,
+              email: req.body.email,
             });
           }
         });
@@ -589,7 +589,29 @@ exports.getFollowingList = (req, res) => {
   }
 };
 
-const verifyToken = (req, res) => {};
+//////////// (token, userID)//////
+exports.verifyToken = (req, res) => {
+  try {
+    User.findById(req.body.userID).then((user) => {
+      if (!user)
+        return res.status(404).json({message: "User not found", verify: false});
+      else {
+        const isTokenVerified = jsonwebtoken.verify(
+          req.body.token,
+          process.env.JWT_TOKEN
+        );
+
+        if (!isTokenVerified) {
+          return res.status(200).json({message: "", verify: true});
+        }
+      }
+    });
+  } catch (err) {
+    res
+      .status(500)
+      .json({message: "Error - verifyToken", err: err, verify: false});
+  }
+};
 
 /////// (userID, email)
 exports.sendVerifyEmailAgain = sendVerifyEmailAgain;
