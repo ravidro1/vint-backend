@@ -1,4 +1,4 @@
-FROM node:18-alpine3.16
+FROM node:19-alpine3.16
 
 # Create app directory
 WORKDIR /app
@@ -9,13 +9,12 @@ WORKDIR /app
 COPY package*.json ./
 
 RUN npm install
-# If you are building your code for production
 # RUN npm ci --only=production
 
 # Bundle app source
 COPY . .
 
+# If you are building your code for production
 EXPOSE 8081
 #EXPOSE 2000
 CMD [ "node", "Server.js" ]
-#CMD [ "node", "socket.io" ]

@@ -15,6 +15,7 @@
     "@sashido/teachablemachine-node": "^1.2.2",
     "bcrypt": "^5.1.0",
     "canvas": "^2.11.0",
+    "cario": "^10.4.12",
     "cloudinary": "^1.35.0",
     "cors": "^2.8.5",
     "date-and-time": "^2.4.2",
