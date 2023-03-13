@@ -161,7 +161,7 @@ module.exports = {
     User.findOne({ _id: user_id }).then((user) => {
       User.find({ _id: { $in: user?.following } }).then((followingSellers) => {
         followingSellers.map((seller) => {
-          Products.find({ _id: { $in: seller?.products } }).then((products) => {
+          Products.find({_id: {$in: seller?.products}}).then((products) => {
             productsArr.push(SortByTags(seller._id, products));
           });
         });
@@ -171,7 +171,7 @@ module.exports = {
     res.json(answer);
   },
   MyTown: async (req, res) => {
-    const { town } = req.body;
+    const {town} = req.body;
     let allLiked = [];
     let clone = [];
     User.find({ location: town }).then((users) => {

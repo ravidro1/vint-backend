@@ -217,9 +217,12 @@ exports.signUp = async (req, res) => {
             process.env.JWT_TOKEN
           );
 
-          res
-            .status(200)
-            .json({message: "User Created", userID: user._id, token});
+          res.status(200).json({
+            message: "User Created",
+            userID: user._id,
+            token,
+            email: body.email,
+          });
         }
       })
       .catch((error) => {
@@ -298,6 +301,7 @@ exports.login = (req, res) => {
               userID: user._id,
               isActive: user.isActive,
               token,
+              email: body.email,
             });
           }
         });
@@ -592,8 +596,6 @@ exports.sendVerifyEmailAgain = sendVerifyEmailAgain;
 
 ////// (userID, newPassword)
 exports.changePassword = changePassword;
-
-
 
 const RandomProducts = (times) => {
   let randomProducts;
