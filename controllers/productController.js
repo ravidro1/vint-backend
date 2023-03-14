@@ -45,76 +45,25 @@ function SumMyProducts(userId) {
 
 module.exports = {
   CreateProduct: (req, res) => {
-    const {
-      userId,
-      productName,
-      productDescription,
-      productPrice,
-      productMedia,
-      productCategory,
-      onBid,
-      productCondition,
-      tags,
-    } = req.body;
-    let modifiedTags = GetTags(
-      tags,
-      productName,
-      productCategory,
-      productDescription
-    );
-    const product = new Products({
-      name: productName,
-      description: productDescription,
-      price: productPrice,
-      media: productMedia,
-      category: productCategory,
-      onBid: onBid,
-      condition: productCondition,
-      seller: userId,
-      tags: modifiedTags,
-    });
-    product?.save();
-    res.send(product);
-    SumMyProducts(userId);
-  },
-  Rabid: (req, res) => {
-    const { bid, productId } = req.body;
-    Products.findOne({ _id: productId }).then((product) => {
-      if (product?.onBid.length > 0) {
-        if (bid > product?.onBid[product?.onBid.length - 1]) {
-          product?.onBid.unshift(bid);
-          product?.save();
-          res.send(product);
-        }
-      } else {
-        product?.onBid.unshift(bid);
-        product?.save();
-        res.send(product);
-      }
-    });
-  },
-  EditProduct: (req, res) => {
-    const {
-      productId,
-      userId,
-      productName,
-      productDescription,
-      productPrice,
-      productMedia,
-      productCategory,
-      onBid,
-      productCondition,
-      tags,
-    } = req.body;
-    let modifiedtags = GetTags(
-      tags,
-      productName,
-      productCategory,
-      productDescription
-    );
-    Products.findOneAndUpdate(
-      { _id: productId },
-      {
+    try {
+      const {
+        userId,
+        productName,
+        productDescription,
+        productPrice,
+        productMedia,
+        productCategory,
+        onBid,
+        productCondition,
+        tags,
+      } = req.body;
+      let modifiedTags = GetTags(
+          tags,
+          productName,
+          productCategory,
+          productDescription
+      );
+      const product = new Products({
         name: productName,
         description: productDescription,
         price: productPrice,
@@ -123,40 +72,115 @@ module.exports = {
         onBid: onBid,
         condition: productCondition,
         seller: userId,
-        tags: modifiedtags,
-      }
-    ).then((result) => {
-      res.send(result);
-    });
+        tags: modifiedTags,
+      });
+      product?.save();
+      res.send(product);
+      SumMyProducts(userId);
+    } catch (e){
+      console.log(e)
+    }
+  },
+  Rabid: (req, res) => {
+    try {
+      const {bid, productId} = req.body;
+      Products.findOne({_id: productId}).then((product) => {
+        if (product?.onBid.length > 0) {
+          if (bid > product?.onBid[product?.onBid.length - 1]) {
+            product?.onBid.unshift(bid);
+            product?.save();
+            res.send(product);
+          }
+        } else {
+          product?.onBid.unshift(bid);
+          product?.save();
+          res.send(product);
+        }
+      });
+    } catch (e) {
+      console.log(e)
+    }
+  },
+  EditProduct: (req, res) => {
+    try {
+      const {
+        productId,
+        userId,
+        productName,
+        productDescription,
+        productPrice,
+        productMedia,
+        productCategory,
+        onBid,
+        productCondition,
+        tags,
+      } = req.body;
+      let modifiedtags = GetTags(
+          tags,
+          productName,
+          productCategory,
+          productDescription
+      );
+      Products.findOneAndUpdate(
+          {_id: productId},
+          {
+            name: productName,
+            description: productDescription,
+            price: productPrice,
+            media: productMedia,
+            category: productCategory,
+            onBid: onBid,
+            condition: productCondition,
+            seller: userId,
+            tags: modifiedtags,
+          }
+      ).then((result) => {
+        res.send(result);
+      });
+    } catch (e) {
+      console.log(e)
+    }
   },
   Sold: (req, res) => {
-    const { productId, review } = req.body;
-    Products.findOneAndUpdate({ _id: productId }, { status: false }).then(
-      (result) => {
-        res.send(result);
-      }
-    );
+    try {
+      const {productId, review} = req.body;
+      Products.findOneAndUpdate({_id: productId}, {status: false}).then(
+          (result) => {
+            res.send(result);
+          }
+      );
+    } catch (e){
+      console.log(e)
+    }
   },
   AddWatcher: (req, res) => {
-    const { productId } = req.body;
-    Products.findOne({ _id: productId }).then((product) => {
-      product.watchers += 1;
-      product?.save().then((result) => {
-        console.log(result);
+    try {
+      const {productId} = req.body;
+      Products.findOne({_id: productId}).then((product) => {
+        product.watchers += 1;
+        product?.save().then((result) => {
+          console.log(result);
+        });
+        res.send(true);
       });
-      res.send(true);
-    });
+    } catch (e) {
+      console.log(e)
+    }
   },
   AddReview: (req, res) => {
-    const { productId, review } = req.body;
-    Products.findOne({ _id: productId }).then((product) => {
-      if (!product?.status) {
-        product.review = review;
-        product?.save();
-        res.send(true);
-      } else {
-        res.send(false);
-      }
-    });
+    try {
+      const {productId, review} = req.body;
+      Products.findOne({_id: productId}).then((product) => {
+        if (!product?.status) {
+          product.review = review;
+          product?.save();
+          res.send(true);
+        } else {
+          res.send(false);
+        }
+      });
+    } catch(e){
+      console.log(e)
+    }
   },
 };

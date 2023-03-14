@@ -12,7 +12,7 @@ const PORT = 8081 || process.env.PORT;
 
 //routes
 const userRouter = require("./routes/userRoutes");
-
+const productRouter = require("./routes/product")
 
 // DB connection
 mongoose
@@ -31,6 +31,6 @@ app.use(cors());
 
 // routes define
 app.use("/api/v1/user", userRouter);
-
+app.use("/api/v1/product", productRouter);
 
 app.listen(PORT, () => console.log("connected: " + PORT));
