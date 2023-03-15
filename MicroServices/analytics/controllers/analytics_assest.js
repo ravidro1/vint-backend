@@ -118,22 +118,24 @@ module.exports = {
   },
   SortByTags: (user_id, products) => {
     const Answer = [];
-    Analytics.findOne({ user_id: user_id }).then((analytics) => {
-      products.map((product) => {
-        let matchRank = 0;
-        analytics?.sum.map((tag) => {
-          if (product.tags?.includes(GetTag(tag))) {
-            matchRank = matchRank + tag.score;
-          }
-        });
-        Answer.push({ product, score: matchRank });
-      });
-      // Answer.sort(GetScore);
-      analytics.unseen = Answer.sort(GetScore);
-      analytics?.save();
-    });
-    return Answer.sort(GetScore);
+    // Analytics.findOne({ user_id: user_id }).then((analytics) => {
+    //   products.map((product) => {
+    //     let matchRank = 0;
+    //     analytics?.sum.map((tag) => {
+    //       if (product.tags?.includes(GetTag(tag))) {
+    //         matchRank = matchRank + tag.score;
+    //       }
+    //     });
+    //     Answer.push({ product, score: matchRank });
+    //   });
+    //   // Answer.sort(GetScore);
+    //   analytics.unseen = Answer.sort(GetScore);
+    //   analytics?.save();
+    // });
+    // return Answer.sort(GetScore);
+    return products
   },
+
   SumSellers: (user_id) => {
     User.findOne({ _id: user_id })
       .populate("following")
