@@ -19,6 +19,7 @@ const {
 
 module.exports = {
   GetFeed: async (req,res) =>{
+    const {user_id} = req.body;
     Products.find().then((products)=>{
       res.json(products)
     })
