@@ -81,7 +81,7 @@ const changePassword = async (req, res) => {
     User.findByIdAndUpdate(body.userID, {password: newPassword}).then(
       (user) => {
         if (!user.password) {
-          res.status(403).json({message: "Error - changePassword"});
+          res.status(400).json({message: "Error - changePassword"});
         } else {
           console.log(newPassword);
           res.status(200).json({message: "Password changed"});
@@ -99,11 +99,11 @@ const sendVerifyEmailAgain = (req, res) => {
 
     if (!checkEmail(body.email))
       return res
-        .status(403)
+        .status(400)
         .json({message: "This Mail Address Is Not Valid!!!"});
 
     User.findById(body.userID).then((user) => {
-      if (!user) return res.status(404).json({message: "User not found"});
+      if (!user) return res.status(400).json({message: "User not found"});
       else {
         const VerificationCode = Math.round(Math.random() * 899999 + 100000);
 
@@ -150,11 +150,12 @@ const sendVerifyEmailAgain = (req, res) => {
 /// (name,password,email,phone,username)
 exports.signUp = async (req, res) => {
   try {
+    console.log("signUp");
     const body = req.body;
 
     if (!checkEmail(body.email))
       return res
-        .status(403)
+        .status(400)
         .json({message: "This Mail Address Is Not Valid!!!"});
 
     const hashPassword = await bcrypt.hash(body.password, 10);
@@ -168,7 +169,7 @@ exports.signUp = async (req, res) => {
     newUser
       .save()
       .then((user) => {
-        if (!user) res.status(403).json({message: "User Creation Failed"});
+        if (!user) res.status(400).json({message: "User Creation Failed"});
         else {
           const VerificationCode = Math.round(Math.random() * 899999 + 100000);
 
@@ -201,7 +202,7 @@ exports.signUp = async (req, res) => {
             .then((productList) => {
               if (!productList)
                 return res
-                  .status(403)
+                  .status(400)
                   .json({message: "Error - ProductList null"});
               else {
                 const newAnalytics = new Analytics({user_id: user._id});
@@ -251,9 +252,10 @@ exports.signUp = async (req, res) => {
 ////// (userID, code)
 exports.verifyEmail = (req, res) => {
   try {
+    console.log("verifyEmail");
     EmailVerify.findOne({userID: req.body.userID}).then((emailVerify) => {
       if (!emailVerify)
-        res.status(403).json({message: "emailVerify not found"});
+        res.status(400).json({message: "emailVerify not found"});
       else {
         if (req.body.code == emailVerify.code.toString()) {
           EmailVerify.findOneAndDelete({userID: req.body.userID}).catch(
@@ -292,6 +294,7 @@ exports.verifyEmail = (req, res) => {
 /////// (username, password)
 exports.login = (req, res) => {
   try {
+    console.log("login");
     User.findOne({username: req.body.username}).then((user) => {
       if (!user) res.status(400).json({message: "User not found"});
       else {
@@ -305,9 +308,10 @@ exports.login = (req, res) => {
               loginCounter: user.loginCounter + 1,
             }).catch(() => {
               return res
-                .status(403)
+                .status(400)
                 .json({message: "login - User Update Failed"});
             });
+
             res.status(200).json({
               message: "User Logged in",
               userID: user._id,
@@ -331,12 +335,12 @@ exports.changeEmail = (req, res) => {
 
     if (!checkEmail(body.newEmail))
       return res
-        .status(403)
+        .status(400)
         .json({message: "This Mail Address Is Not Valid!!!"});
 
     User.findByIdAndUpdate(body.userID, {email: body.newEmail}).then((user) => {
       if (!user) {
-        res.status(404).json({message: "Change Email Faild", err});
+        res.status(400).json({message: "Change Email Faild", err});
       } else {
         sendVerifyEmailAgain(req, res);
         // res.status(200).json({message: "Change Email"});
@@ -352,7 +356,7 @@ exports.forgotPassword = (req, res) => {
   try {
     const body = req.body;
     User.findOne({username: body.username}).then((user) => {
-      if (!user) res.status(404).json({message: "Can't Find User"});
+      if (!user) res.status(400).json({message: "Can't Find User"});
       else {
         if (!checkEmail(user.email))
           return res
@@ -384,7 +388,7 @@ exports.forgotPassword = (req, res) => {
 exports.deleteAccount = (req, res) => {
   try {
     User.findByIdAndDelete(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({message: "User not found"});
+      if (!user) res.status(400).json({message: "User not found"});
       else {
         sendEmail(
           "Account Deleted",
@@ -426,7 +430,7 @@ exports.changeProfilePicture = async (req, res) => {
 exports.getWishList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({message: "User not found"});
+      if (!user) res.status(400).json({message: "User not found"});
       else {
         user.populate("WishList").then((populateUser) => {
           res
@@ -443,7 +447,7 @@ exports.getWishList = (req, res) => {
 exports.addToWishList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({message: "User not found"});
+      if (!user) res.status(400).json({message: "User not found"});
       else {
         user?.update({
           WishList: [...user.WishList, req.body.newItemWishList],
@@ -458,7 +462,7 @@ exports.addToWishList = (req, res) => {
 exports.removeFromWishList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({message: "User not found"});
+      if (!user) res.status(400).json({message: "User not found"});
       else {
         user.update({
           WishList: [
@@ -478,7 +482,7 @@ exports.removeFromWishList = (req, res) => {
 exports.addProductToUserProductsList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({message: "User not found"});
+      if (!user) res.status(400).json({message: "User not found"});
       else {
         user.update({
           userProducts: [...user.userProducts, req.body.newProduct],
@@ -495,7 +499,7 @@ exports.addProductToUserProductsList = (req, res) => {
 exports.removeProductFromUserProductsList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({message: "User not found"});
+      if (!user) res.status(400).json({message: "User not found"});
       else {
         user.update({
           userProducts: [
@@ -517,7 +521,7 @@ exports.removeProductFromUserProductsList = (req, res) => {
 exports.getUserProductsList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({message: "User not found"});
+      if (!user) res.status(400).json({message: "User not found"});
       else {
         user.populate("userProducts").then((populateUser) => {
           res.status(200).json({
@@ -537,7 +541,7 @@ exports.getUserProductsList = (req, res) => {
 exports.addSellerToFollowingList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({message: "User not found"});
+      if (!user) res.status(400).json({message: "User not found"});
       else {
         user.update({
           following: [...user.following, req.body.newFollowingItem],
@@ -560,7 +564,7 @@ exports.addSellerToFollowingList = (req, res) => {
 exports.removeSellerFromFollowingList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({message: "User not found"});
+      if (!user) res.status(400).json({message: "User not found"});
       else {
         user.update({
           following: [
@@ -586,7 +590,7 @@ exports.removeSellerFromFollowingList = (req, res) => {
 exports.getFollowingList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
-      if (!user) res.status(404).json({message: "User not found"});
+      if (!user) res.status(400).json({message: "User not found"});
       else {
         user?.populate("following").then((populateUser) => {
           res.status(200).json({
@@ -604,17 +608,22 @@ exports.getFollowingList = (req, res) => {
 //////////// (token, userID)//////
 exports.verifyToken = (req, res) => {
   try {
+    console.log("verifyToken");
     User.findById(req.body.userID).then((user) => {
       if (!user)
-        return res.status(404).json({message: "User not found", verify: false});
+        return res.status(400).json({message: "User not found", verify: false});
       else {
         const isTokenVerified = jsonwebtoken.verify(
           req.body.token,
           process.env.JWT_TOKEN
         );
 
-        if (!isTokenVerified) {
-          return res.status(200).json({message: "", verify: true});
+        if (isTokenVerified) {
+          return res.status(200).json({message: "Verify Token", verify: true});
+        } else {
+          return res
+            .status(200)
+            .json({message: "Unverify Token", verify: false});
         }
       }
     });
@@ -622,6 +631,7 @@ exports.verifyToken = (req, res) => {
     res
       .status(500)
       .json({message: "Error - verifyToken", err: err, verify: false});
+    console.log("this is err", err);
   }
 };
 
