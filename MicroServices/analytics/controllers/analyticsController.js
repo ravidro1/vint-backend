@@ -162,7 +162,7 @@ module.exports = {
         if (Answer.length === 0){
           res.json("no products found")
         }
-        res.json(Answer);
+        res.json(Array.from(new Set(Answer)));
       });
     } catch (e) {
       console.log(e);

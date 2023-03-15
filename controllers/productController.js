@@ -46,8 +46,10 @@ function SumMyProducts(userId) {
           tags.sort((a, b) => b.score - a.score);
           Analytics.findOne({user_id: userId}).then((userAnalytics) => {
             // console.log(userAnalytics)
-            userAnalytics?.myPublishedProductsSum.update(tags);
-            userAnalytics?.save();
+            if (userAnalytics?.myPublishedProductsSum) {
+              userAnalytics.myPublishedProductsSum = tags;
+              userAnalytics?.save();
+            }
           });
         } else {
           const analytics = new Analytics({
@@ -78,6 +80,7 @@ module.exports = {
         productMedia,
         productCategory,
         onBid,
+        size,
         productCondition,
         tags,
       } = req.body;
@@ -99,6 +102,7 @@ module.exports = {
         media: [{url: imageURL, type: productMedia.typeImageOrVideo}],
         category: productCategory,
         onBid: onBid,
+        size:size,
         condition: productCondition,
         seller: userId,
         tags: modifiedTags,
