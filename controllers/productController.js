@@ -17,6 +17,7 @@ function SumMyProducts(userId) {
       .populate("userProducts")
       .then((products) => {
         const tags = [];
+        if (products.length > 1) {
         products?.map((product) => {
           product.tags.map((tag) => {
             let exist = false;
@@ -37,6 +38,11 @@ function SumMyProducts(userId) {
           userAnalytics.myPublishedProductsSum = tags;
           userAnalytics?.save();
         });
+      }
+      console.log(products);
+      products[0]?.tags?.map((tag) => {
+      tags.push({ tag: tag, score: 1 });
+      })
       });
   } catch (err) {
     console.log(err);
@@ -57,6 +63,7 @@ module.exports = {
         productCondition,
         tags,
       } = req.body;
+      console.log(req.body);
       let modifiedTags = GetTags(
           tags,
           productName,
