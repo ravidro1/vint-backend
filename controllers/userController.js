@@ -292,6 +292,13 @@ exports.verifyEmail = (req, res) => {
   }
 };
 
+exports.userInfo = (req,res)=>{
+  const {userID} = req.body;
+  User.findOne({_id:userID}).then((user)=>{
+    res.json(user)
+  })
+}
+
 /////// (username, password)
 exports.login = (req, res) => {
   try {

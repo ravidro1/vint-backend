@@ -101,8 +101,8 @@ module.exports = {
       product?.save().then((rs, then)=>{
         // console.log(rs._id.toString())
         User.findOne({_id: userId}).then((user)=>{
-          user.userProducts.push(rs._id.toString())
-          user.save()
+          user?.userProducts.push(rs._id.toString())
+          user?.save()
         })
       })
 
