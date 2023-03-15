@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 
+const multer = require("multer");
+const upload = multer();
+
 const {
   CreateProduct,
   Rabid,
@@ -10,7 +13,11 @@ const {
   AddWatcher,
 } = require("../controllers/productController");
 
-router.post("/createproduct", CreateProduct);
+router.post(
+  "/createproduct",
+  //  upload.single("file"),
+  CreateProduct
+);
 router.post("/bid", Rabid);
 router.post("/update", EditProduct);
 router.post("/sold", Sold);

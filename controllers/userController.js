@@ -6,7 +6,7 @@ const Product = require("../models/Product");
 const bcrypt = require("bcrypt");
 const jsonwebtoken = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
-const {cloudinaryUploadImage} = require("../GlobaFunction/CloudinaryFunctions");
+const {cloudinaryUpload} = require("../GlobaFunction/CloudinaryFunctions");
 
 const checkEmail = (toEmail) => {
   if (!toEmail.endsWith("@gmail.com")) {
@@ -18,10 +18,10 @@ const checkEmail = (toEmail) => {
 
 const RandomProducts = (times) => {
   let randomProducts = [];
-   Product.find().then((products) => {
+  Product.find().then((products) => {
     for (let i = 0; i < times; i++) {
       const randomProduct =
-          products[Math.floor(Math.random() * products.length)];
+        products[Math.floor(Math.random() * products.length)];
       randomProducts?.push(randomProduct);
     }
     return randomProducts;
@@ -163,7 +163,7 @@ exports.signUp = async (req, res) => {
     const newUser = new User({
       ...body,
       password: hashPassword,
-      fastLoadProducts: RandomProducts(4)
+      fastLoadProducts: RandomProducts(4),
     });
     // console.log(newUser);
     newUser
@@ -202,11 +202,13 @@ exports.signUp = async (req, res) => {
             .then((productList) => {
               if (!productList) {
                 return res
-                    .status(400)
-                    .json({message: "Error - ProductList null"});
-              }
-              else {
-                const newAnalytics = new Analytics({user_id: user._id, unseen:productList});
+                  .status(400)
+                  .json({message: "Error - ProductList null"});
+              } else {
+                const newAnalytics = new Analytics({
+                  user_id: user._id,
+                  unseen: productList,
+                });
                 // newAnalytics.unseen = productList;
                 newAnalytics
                   ?.save()
@@ -292,12 +294,12 @@ exports.verifyEmail = (req, res) => {
   }
 };
 
-exports.userInfo = (req,res)=>{
+exports.userInfo = (req, res) => {
   const {userID} = req.body;
-  User.findOne({_id:userID}).then((user)=>{
-    res.json(user)
-  })
-}
+  User.findOne({_id: userID}).then((user) => {
+    res.json(user);
+  });
+};
 
 /////// (username, password)
 exports.login = (req, res) => {
@@ -351,6 +353,7 @@ exports.changeEmail = (req, res) => {
         res.status(400).json({message: "Change Email Faild", err});
       } else {
         sendVerifyEmailAgain(req, res);
+
         // res.status(200).json({message: "Change Email"});
       }
     });
@@ -412,13 +415,19 @@ exports.deleteAccount = (req, res) => {
   }
 };
 
-////////////// (userID, file)
+////////////// (userID,  image = (size,mimetype,data,typeImageOrVideo))
 exports.changeProfilePicture = async (req, res) => {
   try {
-    const image = req.file;
+    const {size, mimetype, data, typeImageOrVideo} = req.file;
 
     const {userID} = req.body;
-    const pic_URL = await cloudinaryUploadImage(image);
+
+    const pic_URL = await cloudinaryUpload({
+      size,
+      mimetype,
+      data,
+      typeImageOrVideo,
+    });
 
     User.findByIdAndUpdate(userID, {profilePicture: pic_URL}).then((user) => {
       if (!user) res.status(404).json({message: "Can't Find User"});
@@ -648,8 +657,6 @@ exports.sendVerifyEmailAgain = sendVerifyEmailAgain;
 
 ////// (userID, newPassword)
 exports.changePassword = changePassword;
-
-
 
 function SumSellers(userId) {
   User.findOne({_id: userId})

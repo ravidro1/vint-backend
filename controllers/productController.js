@@ -1,3 +1,4 @@
+const {cloudinaryUpload} = require("../GlobaFunction/CloudinaryFunctions");
 const Analytics = require("../models/Analytics");
 const Products = require("../models/Product");
 const User = require("../models/User");
@@ -8,7 +9,7 @@ function removeDuplicates(arr) {
 function GetTags(tags, name, category, description) {
   const totaer = tags + " " + name + " " + category + " " + description;
   const myArray = totaer.split(" ");
-  // console.log(myArray);
+
   return removeDuplicates(myArray);
 }
 
@@ -17,10 +18,10 @@ function SumMyProducts(userId) {
     // User.findOne({_id: userId}).then((user)=>{
     //   user.userProducts =
     // })
-    User.findOne({ _id: userId })
+    User.findOne({_id: userId})
       .populate("userProducts")
       .then((userProducts) => {
-        const products = userProducts.userProducts
+        const products = userProducts.userProducts;
         // console.log(products.userProducts)
         const tags = [];
         if (products.length >= 1) {
@@ -37,13 +38,13 @@ function SumMyProducts(userId) {
                 }
               });
               if (!exist) {
-                tags.push({ tag: tag, score: 1 });
+                tags.push({tag: tag, score: 1});
                 // console.log(tags)
               }
             });
           });
           tags.sort((a, b) => b.score - a.score);
-          Analytics.findOne({ user_id: userId }).then((userAnalytics) => {
+          Analytics.findOne({user_id: userId}).then((userAnalytics) => {
             // console.log(userAnalytics)
             userAnalytics?.myPublishedProductsSum.update(tags);
             userAnalytics?.save();
@@ -51,13 +52,13 @@ function SumMyProducts(userId) {
         } else {
           const analytics = new Analytics({
             user_id: userId,
-            myPublishedProductsSum: tags
-          })
-          analytics?.save()
+            myPublishedProductsSum: tags,
+          });
+          analytics?.save();
         }
         console.log(products);
         products[0]?.tags?.map((tag) => {
-          tags.push({ tag: tag, score: 1 });
+          tags.push({tag: tag, score: 1});
         });
       });
   } catch (err) {
@@ -66,7 +67,7 @@ function SumMyProducts(userId) {
 }
 
 module.exports = {
-  CreateProduct: (req, res) => {
+  CreateProduct: async (req, res) => {
     try {
       console.log("hey");
       const {
@@ -80,31 +81,35 @@ module.exports = {
         productCondition,
         tags,
       } = req.body;
-      console.log(req.body);
+
+      const imageURL = await cloudinaryUpload(productMedia);
+      console.log(imageURL);
+
       let modifiedTags = GetTags(
         tags,
         productName,
         productCategory,
         productDescription
       );
+
       const product = new Products({
         name: productName,
         description: productDescription,
         price: productPrice,
-        media: productMedia,
+        media: [{url: imageURL, type: productMedia.typeImageOrVideo}],
         category: productCategory,
         onBid: onBid,
         condition: productCondition,
         seller: userId,
         tags: modifiedTags,
       });
-      product?.save().then((rs, then)=>{
-        // console.log(rs._id.toString())
-        User.findOne({_id: userId}).then((user)=>{
-          user?.userProducts.push(rs._id.toString())
-          user?.save()
-        })
-      })
+
+      product?.save().then((rs, then) => {
+        User.findOne({_id: userId}).then((user) => {
+          user?.userProducts.push(rs._id.toString());
+          user?.save();
+        });
+      });
 
       res.send(product);
       SumMyProducts(userId);
@@ -114,8 +119,8 @@ module.exports = {
   },
   Rabid: (req, res) => {
     try {
-      const { bid, productId } = req.body;
-      Products.findOne({ _id: productId }).then((product) => {
+      const {bid, productId} = req.body;
+      Products.findOne({_id: productId}).then((product) => {
         if (product?.onBid.length > 0) {
           if (bid > product?.onBid[product?.onBid.length - 1]) {
             product?.onBid.unshift(bid);
@@ -153,7 +158,7 @@ module.exports = {
         productDescription
       );
       Products.findOneAndUpdate(
-        { _id: productId },
+        {_id: productId},
         {
           name: productName,
           description: productDescription,
@@ -174,8 +179,8 @@ module.exports = {
   },
   Sold: (req, res) => {
     try {
-      const { productId, review } = req.body;
-      Products.findOneAndUpdate({ _id: productId }, { status: false }).then(
+      const {productId, review} = req.body;
+      Products.findOneAndUpdate({_id: productId}, {status: false}).then(
         (result) => {
           res.send(result);
         }
@@ -186,8 +191,8 @@ module.exports = {
   },
   AddWatcher: (req, res) => {
     try {
-      const { productId } = req.body;
-      Products.findOne({ _id: productId }).then((product) => {
+      const {productId} = req.body;
+      Products.findOne({_id: productId}).then((product) => {
         product.watchers += 1;
         product?.save().then((result) => {
           console.log(result);
@@ -200,8 +205,8 @@ module.exports = {
   },
   AddReview: (req, res) => {
     try {
-      const { productId, review } = req.body;
-      Products.findOne({ _id: productId }).then((product) => {
+      const {productId, review} = req.body;
+      Products.findOne({_id: productId}).then((product) => {
         if (!product?.status) {
           product.review = review;
           product?.save();
