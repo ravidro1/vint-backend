@@ -14,12 +14,12 @@ const product_schema = mongoose.Schema({
   description: { type: String, required: true, default: "" },
   media: [
     {
-      url: { type: Array, required: true },
+      url: { type: String, required: true },
       type: { type: String, required: true },
     },
   ],
   date: { type: Date, default: Date.now },
-  status: { type: Boolean, default: true, default: true },
+  status: { type: Boolean, default: true },
   review: { type: String, required: false },
   watchers: { type: Number, required: true, default: 0 },
   tags: { type: Array, required: false },

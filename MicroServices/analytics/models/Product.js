@@ -14,7 +14,7 @@ const product_schema = mongoose.Schema({
   description: { type: String, required: true },
   media: [
     {
-      url: { type: Array, required: true },
+      url: { type: String, required: true },
       type: { type: String, required: true },
     },
   ],
