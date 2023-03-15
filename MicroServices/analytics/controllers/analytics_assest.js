@@ -1,7 +1,19 @@
 const Analytics = require("../models/Analytics");
 const Products = require("../models/Product");
 const User = require("../models/User");
-
+const GetTag = (tag) => {
+  return tag.tag;
+}
+    const GetScore = (tag) => {
+  return tag.score;
+}
+Local_GetProductTags = (productId) => {
+  return Products.findOne({_id: productId}).then((product) => {
+    if (product) {
+      return product?.tags;
+    }
+  });
+}
 module.exports = {
   GetSeen: (user_id) => {
     Analytics.findOne({ user_id: user_id }).then((analytics) => {
@@ -50,8 +62,8 @@ module.exports = {
   },
   CalcSummary: (user_id, clicks, observers, liked) => {
     let likedtags = [];
-    const likesToClicks = liked.map((likedProduct) => {
-      likedtags.push(...GetProductTags(likedProduct));
+    liked.map((likedProduct) => {
+      likedtags.push(...Local_GetProductTags(likedProduct));
     });
 
     const toClicks = observers.map((observer) => {
@@ -96,12 +108,7 @@ module.exports = {
       Analytics?.save();
     });
   },
-  GetTag: (tag) => {
-    return tag.tag;
-  },
-  GetScore: (tag) => {
-    return tag.score;
-  },
+
   GetProductFromProductArray: (productArr) => {
     let products = [];
     productArr.map((product) => {
