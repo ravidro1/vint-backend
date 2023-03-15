@@ -15,6 +15,7 @@ const {
   GetTag,
   SumSellers,
 } = require("MicroServices/analytics/controllers/analytics_assest");
+const { GetProductViaIds } = require("./analytics_assest");
 
 module.exports = {
   GetFeed: async (req, res) => {
@@ -31,7 +32,7 @@ module.exports = {
           response = analytics?.unseen;
         });
       }
-      res.json(response);
+      res.json(GetProductViaIds(response));
       // now just sort!
       // if (first time) return randomized
       // else return getunseen
@@ -55,7 +56,7 @@ module.exports = {
     }
   },
   AddAnalytics: async (req, res) => {
-    const { user_id, productsArr, seen } = req.body;
+    const { user_id, productsArr } = req.body;
     Analytics.findOne({ user_id: user_id }).then((userAnalytics) => {
       Products.find({ _id: { $in: [productsArr.productId] } }).then(
         (products) => {
@@ -140,7 +141,7 @@ module.exports = {
             product.category.toLowerCase().includes(input.toLowerCase())
           );
         });
-        Answer.push(SortByTags(user_id, highMatchProducts));
+        Answer.push(...SortByTags(user_id, highMatchProducts));
         //filter low match products:
         lowMatchProducts = products.filter((product) => {
           return product.tags.filter((tag) => {
@@ -161,7 +162,7 @@ module.exports = {
     User.findOne({ _id: user_id }).then((user) => {
       User.find({ _id: { $in: user?.following } }).then((followingSellers) => {
         followingSellers.map((seller) => {
-          Products.find({_id: {$in: seller?.products}}).then((products) => {
+          Products.find({ _id: { $in: seller?.products } }).then((products) => {
             productsArr.push(SortByTags(seller._id, products));
           });
         });
@@ -171,7 +172,7 @@ module.exports = {
     res.json(answer);
   },
   MyTown: async (req, res) => {
-    const {town} = req.body;
+    const { town } = req.body;
     let allLiked = [];
     let clone = [];
     User.find({ location: town }).then((users) => {
@@ -181,7 +182,7 @@ module.exports = {
             allLiked.push(user.liked);
           });
           // insert times repeated function
-          res.json(sortAndRemoveDuplicates(allLiked));
+          res.json(sortAndRemoveDuplicate(allLiked));
         }
       );
     });

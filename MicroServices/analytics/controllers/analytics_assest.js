@@ -198,7 +198,7 @@ module.exports = {
       console.log(user_id);
       const analytics = Analytics.findOne({ user_id: user_id });
       if (analytics) {
-        console.log(analytics.unseen);
+        console.log(analytics?.unseen);
         return analytics?.unseen;
       }
     } catch (err) {
@@ -230,6 +230,11 @@ module.exports = {
       if (user) {
         return user?.fastLoadProducts;
       }
+    });
+  },
+  GetProductViaIds: async (productsArr) => {
+    Products.find({ _id: { $in: productsArr } }).then((products) => {
+      return products;
     });
   },
 };
