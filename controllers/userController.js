@@ -16,6 +16,17 @@ const checkEmail = (toEmail) => {
   return true;
 };
 
+const RandomProducts = (times) => {
+  let randomProducts;
+  return Product.find().then((products) => {
+    for (let i = 0; i < times; i++) {
+      const randomProduct =
+          products[Math.floor(Math.random() * products.length)];
+      randomProducts.push(randomProduct);
+    }
+    return randomProducts;
+  });
+};
 const sendEmail = (subject, html, toEmail) => {
   try {
     if (!toEmail.endsWith("@gmail.com")) return;
@@ -151,6 +162,7 @@ exports.signUp = async (req, res) => {
     const newUser = new User({
       ...body,
       password: hashPassword,
+      fastLoadProducts: RandomProducts(7)
     });
     // console.log(newUser);
     newUser
@@ -619,17 +631,7 @@ exports.sendVerifyEmailAgain = sendVerifyEmailAgain;
 ////// (userID, newPassword)
 exports.changePassword = changePassword;
 
-const RandomProducts = (times) => {
-  let randomProducts;
-  return Product.find().then((products) => {
-    for (let i = 0; i < times; i++) {
-      const randomProduct =
-        products[Math.floor(Math.random() * products.length)];
-      randomProducts.push(randomProduct);
-    }
-    return randomProducts;
-  });
-};
+
 
 function SumSellers(userId) {
   User.findOne({_id: userId})

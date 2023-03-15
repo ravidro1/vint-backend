@@ -8,21 +8,28 @@ function removeDuplicates(arr) {
 function GetTags(tags, name, category, description) {
   const totaer = tags + " " + name + " " + category + " " + description;
   const myArray = totaer.split(" ");
-  console.log(myArray);
+  // console.log(myArray);
   return removeDuplicates(myArray);
 }
 
 function SumMyProducts(userId) {
   try {
+    // User.findOne({_id: userId}).then((user)=>{
+    //   user.userProducts =
+    // })
     User.findOne({ _id: userId })
       .populate("userProducts")
-      .then((products) => {
+      .then((userProducts) => {
+        const products = userProducts.userProducts
+        // console.log(products.userProducts)
         const tags = [];
-        if (products.length > 1) {
+        if (products.length >= 1) {
           products?.map((product) => {
             product.tags.map((tag) => {
+              console.log(tag)
               let exist = false;
               tags.map((external_Tag) => {
+                console.log(external_Tag)
                 if (external_Tag.tag === tag) {
                   exist = true;
                   external_Tag.score++;
@@ -31,14 +38,22 @@ function SumMyProducts(userId) {
               });
               if (!exist) {
                 tags.push({ tag: tag, score: 1 });
+                console.log(tags)
               }
             });
           });
-          tags.sort((a, b) => a.score - b.score);
+          tags.sort((a, b) => b.score - a.score);
           Analytics.findOne({ _id: userId }).then((userAnalytics) => {
-            userAnalytics.myPublishedProductsSum = tags;
+            console.log(userAnalytics)
+            userAnalytics?.myPublishedProductsSum.update(tags);
             userAnalytics?.save();
           });
+        } else {
+          const analytics = new Analytics({
+            user_id: userId,
+            myPublishedProductsSum: tags
+          })
+          analytics?.save()
         }
         console.log(products);
         products[0]?.tags?.map((tag) => {
@@ -83,7 +98,14 @@ module.exports = {
         seller: userId,
         tags: modifiedTags,
       });
-      product?.save();
+      product?.save().then((rs, then)=>{
+        // console.log(rs._id.toString())
+        User.findOne({_id: userId}).then((user)=>{
+          user.userProducts.push(rs._id.toString())
+          user.save()
+        })
+      })
+
       res.send(product);
       SumMyProducts(userId);
     } catch (e) {
