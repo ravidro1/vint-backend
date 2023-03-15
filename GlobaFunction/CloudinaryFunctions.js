@@ -30,7 +30,7 @@ exports.cloudinaryUpload = async (mediaOBJ) => {
       });
 
     // res.status(200).json({message: url});
-    console.log(url);
+    // console.log(url);
     return url;
   } catch (err) {
     console.log({message: "Error - cloudinaryUploadFile", err});

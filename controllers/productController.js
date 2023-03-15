@@ -104,9 +104,9 @@ module.exports = {
         tags: modifiedTags,
       });
 
-      product?.save().then((rs, then) => {
+      product?.save().then((prod, then) => {
         User.findOne({_id: userId}).then((user) => {
-          user?.userProducts.push(rs._id.toString());
+          user?.userProducts.push(prod._id.toString());
           user?.save();
         });
       });
