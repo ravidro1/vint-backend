@@ -9,8 +9,8 @@ const product_schema = mongoose.Schema({
     required: true,
   },
   price: { type: Array, required: true },
-  condition: { type: String, required: false,  },
-  size: { type: String, required: false  },
+  condition: { type: String, required: false },
+  size: { type: String, required: false},
   onBid: { type: Boolean, required: true, default: false },
   description: { type: String, required: true, default: "" },
   media: [
