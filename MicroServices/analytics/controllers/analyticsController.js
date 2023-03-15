@@ -14,8 +14,8 @@ const {
   sortAndRemoveDuplicate,
   GetTag,
   SumSellers,
-} = require("MicroServices/analytics/controllers/analytics_assest");
-const { GetProductViaIds } = require("./analytics_assest");
+  GetProductViaIds
+} = require("./analytics_assest");
 
 module.exports = {
   GetFeed: async (req, res) => {

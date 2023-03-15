@@ -23,7 +23,7 @@ mongoose
 // essential server settings
 app.use(express.json());
 app.use(cors());
-app.set("routes", __dirname + "/routes");
+// app.set("routes", __dirname + "/routes");
 
 // routes define
 app.use("/", analyticsRouter);
