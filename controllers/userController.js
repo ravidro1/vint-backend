@@ -294,8 +294,8 @@ exports.verifyEmail = (req, res) => {
 
 exports.userInfo = (req,res)=>{
   const {userID} = req.body;
-  User.findOne({_id:userID}).then((user)=>{
-    res.json(user)
+  User.findOne({_id:userID}).populate("userProducts").then((user)=>{
+    res.send(user)
   })
 }
 

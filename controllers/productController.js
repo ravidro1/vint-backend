@@ -45,8 +45,10 @@ function SumMyProducts(userId) {
           tags.sort((a, b) => b.score - a.score);
           Analytics.findOne({ user_id: userId }).then((userAnalytics) => {
             // console.log(userAnalytics)
-            userAnalytics?.myPublishedProductsSum.update(tags);
-            userAnalytics?.save();
+            if (userAnalytics?.myPublishedProductsSum) {
+              userAnalytics.myPublishedProductsSum = tags;
+              userAnalytics?.save();
+            }
           });
         } else {
           const analytics = new Analytics({
