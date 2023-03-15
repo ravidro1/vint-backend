@@ -147,14 +147,21 @@ module.exports = {
             product.category.toLowerCase().includes(input.toLowerCase())
           );
         });
-        Answer.push(...SortByTags(user_id, highMatchProducts));
+        if (highMatchProducts.length > 0) {
+          Answer.push(...SortByTags(user_id, highMatchProducts));
+        }
         //filter low match products:
-        lowMatchProducts = products.filter((product) => {
+        const lowMatchProducts = products.filter((product) => {
           return product.tags.filter((tag) => {
             return input.toLowerCase().includes(tag.toLowerCase());
           });
         });
-        Answer.push(...SortByTags(user_id, lowMatchProducts));
+        if (lowMatchProducts.length > 0) {
+          Answer.push(...SortByTags(user_id, lowMatchProducts));
+        }
+        if (Answer.length === 0){
+          res.json("no products found")
+        }
         res.json(Answer);
       });
     } catch (e) {
