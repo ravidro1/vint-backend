@@ -77,6 +77,7 @@ module.exports = {
         productMedia,
         productCategory,
         onBid,
+        size,
         productCondition,
         tags,
       } = req.body;
@@ -94,6 +95,7 @@ module.exports = {
         media: productMedia,
         category: productCategory,
         onBid: onBid,
+        size:size,
         condition: productCondition,
         seller: userId,
         tags: modifiedTags,

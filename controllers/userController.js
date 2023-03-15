@@ -307,7 +307,6 @@ exports.login = (req, res) => {
       if (!user) res.status(400).json({message: "User not found"});
       else {
         const token = jsonwebtoken.sign({id: user._id}, process.env.JWT_TOKEN);
-
         bcrypt.compare(req.body.password, user.password).then((password) => {
           if (!password) {
             res.status(400).json({message: "Password incorrect"});
