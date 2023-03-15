@@ -18,7 +18,7 @@ const checkEmail = (toEmail) => {
 
 const RandomProducts = (times) => {
   let randomProducts = [];
-  return Product.find().then((products) => {
+   Product.find().then((products) => {
     for (let i = 0; i < times; i++) {
       const randomProduct =
           products[Math.floor(Math.random() * products.length)];
@@ -163,7 +163,7 @@ exports.signUp = async (req, res) => {
     const newUser = new User({
       ...body,
       password: hashPassword,
-      fastLoadProducts: RandomProducts(7)
+      fastLoadProducts: RandomProducts(4)
     });
     // console.log(newUser);
     newUser
