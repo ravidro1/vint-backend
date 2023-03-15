@@ -58,7 +58,7 @@ function SumMyProducts(userId) {
           });
           analytics?.save();
         }
-        console.log(products);
+        // console.log(products);
         products[0]?.tags?.map((tag) => {
           tags.push({tag: tag, score: 1});
         });
@@ -199,7 +199,7 @@ module.exports = {
       Products.findOne({_id: productId}).then((product) => {
         product.watchers += 1;
         product?.save().then((result) => {
-          console.log(result);
+          // console.log(result);
         });
         res.send(true);
       });
