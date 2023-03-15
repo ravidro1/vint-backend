@@ -26,10 +26,10 @@ function SumMyProducts(userId) {
         if (products.length >= 1) {
           products?.map((product) => {
             product.tags.map((tag) => {
-              console.log(tag)
+              // console.log(tag)
               let exist = false;
               tags.map((external_Tag) => {
-                console.log(external_Tag)
+                // console.log(external_Tag)
                 if (external_Tag.tag === tag) {
                   exist = true;
                   external_Tag.score++;
@@ -38,13 +38,13 @@ function SumMyProducts(userId) {
               });
               if (!exist) {
                 tags.push({ tag: tag, score: 1 });
-                console.log(tags)
+                // console.log(tags)
               }
             });
           });
           tags.sort((a, b) => b.score - a.score);
-          Analytics.findOne({ _id: userId }).then((userAnalytics) => {
-            console.log(userAnalytics)
+          Analytics.findOne({ user_id: userId }).then((userAnalytics) => {
+            // console.log(userAnalytics)
             userAnalytics?.myPublishedProductsSum.update(tags);
             userAnalytics?.save();
           });
