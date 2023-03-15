@@ -17,12 +17,12 @@ const checkEmail = (toEmail) => {
 };
 
 const RandomProducts = (times) => {
-  let randomProducts;
+  let randomProducts = [];
   return Product.find().then((products) => {
     for (let i = 0; i < times; i++) {
       const randomProduct =
           products[Math.floor(Math.random() * products.length)];
-      randomProducts.push(randomProduct);
+      randomProducts?.push(randomProduct);
     }
     return randomProducts;
   });
