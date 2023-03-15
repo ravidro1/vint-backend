@@ -14,7 +14,7 @@ const product_schema = mongoose.Schema({
   description: { type: String, required: true, default: "" },
   media: [
     {
-      url: { type: String, required: true },
+      url: { type: String, required: true, default:"https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.imdb.com%2Ftitle%2Ftt22719788%2F&psig=AOvVaw0wQAPEY0Eb8yIsCvNmQrJi&ust=1678996249047000&source=images&cd=vfe&ved=0CBAQjRxqFwoTCPiUscra3v0CFQAAAAAdAAAAABAE" },
       type: { type: String, required: true },
     },
   ],
