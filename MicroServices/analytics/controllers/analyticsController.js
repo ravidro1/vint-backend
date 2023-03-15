@@ -18,43 +18,48 @@ const {
 } = require("./analytics_assest");
 
 module.exports = {
-  GetFeed: async (req, res) => {
-    try {
-      const { user_id } = req.body;
-      let response;
-      User.findOne({ user_id: user_id }).then((user) => {
-        if (user?.loginCounter <= 1) {
-          response = user?.fastLoadProducts;
-        }
-      });
-      if (response) {
-        Analytics.findOne({ user_id: user_id }).then((analytics) => {
-          response = analytics?.unseen;
-        });
-      }
-      res.json(GetProductViaIds(response));
-      // now just sort!
-      // if (first time) return randomized
-      // else return getunseen
-      // after res=> softbyarray and save!
-      //
-      const products = GetUnseen(user_id);
-      let Answer = SortByTags(user_id, products);
-      Products.find().then((products) => {
-        const filteredProducts = products.filter((product) => {
-          return GetSeen(user_id).filter((seen) => {
-            return seen.productId !== product._id;
-          });
-        });
-        Analytics.findOne({ user_id: user_id }).then((analytics) => {
-          analytics.unseen = filteredProducts;
-          analytics?.save();
-        });
-      });
-    } catch (e) {
-      console.log(e);
-    }
+  GetFeed: async (req,res) =>{
+    Products.find().then((products)=>{
+      res.json(products)
+    })
   },
+  // GetFeed: async (req, res) => {
+  //   try {
+  //     const { user_id } = req.body;
+  //     let response;
+  //     User.findOne({ user_id: user_id }).then((user) => {
+  //       if (user?.loginCounter <= 1) {
+  //         response = user?.fastLoadProducts;
+  //       }
+  //     });
+  //     if (response) {
+  //       Analytics.findOne({ user_id: user_id }).then((analytics) => {
+  //         response = analytics?.unseen;
+  //       });
+  //     }
+  //     res.json(GetProductViaIds(response));
+  //     // now just sort!
+  //     // if (first time) return randomized
+  //     // else return getunseen
+  //     // after res=> softbyarray and save!
+  //     //
+  //     const products = GetUnseen(user_id);
+  //     let Answer = SortByTags(user_id, products);
+  //     Products.find().then((products) => {
+  //       const filteredProducts = products.filter((product) => {
+  //         return GetSeen(user_id).filter((seen) => {
+  //           return seen.productId !== product._id;
+  //         });
+  //       });
+  //       Analytics.findOne({ user_id: user_id }).then((analytics) => {
+  //         analytics.unseen = filteredProducts;
+  //         analytics?.save();
+  //       });
+  //     });
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // },
   AddAnalytics: async (req, res) => {
     const { user_id, productsArr } = req.body;
     Analytics.findOne({ user_id: user_id }).then((userAnalytics) => {
