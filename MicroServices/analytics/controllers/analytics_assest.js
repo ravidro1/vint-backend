@@ -135,85 +135,85 @@ module.exports = {
     // return Answer.sort(GetScore);
     return products
   },
-
-  SumSellers: (user_id) => {
-    User.findOne({ _id: user_id })
-      .populate("following")
-      .then((seller) => {
-        Analytics.find({
-          _id: { $in: [seller?.map((single) => single._id)] },
-        }).then((sellersStatistics) => {
-          let favSellers = [];
-          sellersStatistics.map((singleSeller) => {
-            singleSeller.myPublishedProductsSum.map((tag) => {
-              let check = false;
-              if (favSellers.length > 0) {
-                favSellers.map((favTag) => {
-                  if (favTag.tag === tag.tag) {
-                    favTag.score += tag.score; //check for better option
-                  }
-                });
-              } else {
-                check = true;
-                favSellers.push({ tag: tag.tag, score: 1 });
-              }
-              if (!check) {
-                favSellers.push({ tag: tag.tag, score: 1 });
-              }
-            });
-          });
-          Analytics.findOne({ _id: user_id }).then((analytics) => {
-            favSellers.sort((a, b) => a.score - b.score);
-            analytics.sellerPreferences = favSellers;
-            let sellerSuggestions = [];
-            Analytics.find().then((users) => {
-              users.map((user) => {
-                //here compare each seller to the user preference.
-                let singleSellerArray = [];
-                user.myPublishedProductsSum.map((tag) => {
-                  // seller avg tag score
-                  analytics.sellerPreferences.map((favTag) => {
-                    // user avg fav seller tag score
-                    if (tag.tag === favTag.tag) {
-                      singleSellerArray.push({
-                        tag: tag.tag,
-                        score: favTag.score,
-                      });
-                    }
-                  });
-                });
-                function getTheSum(sellerArray) {
-                  let sum = 0;
-                  sellerArray.forEach((tag) => {
-                    sum = sum + tag.score;
-                  });
-                  return sum;
-                }
-                sellerSuggestions.push({
-                  seller: user._id,
-                  score: getTheSum(singleSellerArray),
-                });
-              });
-            });
-            sellerSuggestions.sort((a, b) => a.score - b.score);
-            analytics.suggestedSellers = sellerSuggestions;
-            analytics?.save();
-          });
-        });
-      });
-  },
-  GetUnseen: async (user_id) => {
-    try {
-      console.log(user_id);
-      const analytics = Analytics.findOne({ user_id: user_id });
-      if (analytics) {
-        console.log(analytics?.unseen);
-        return analytics?.unseen;
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  },
+  //
+  // SumSellers: (user_id) => {
+  //   User.findOne({ _id: user_id })
+  //     .populate("following")
+  //     .then((seller) => {
+  //       Analytics.find({
+  //         _id: { $in: [seller?.map((single) => single._id)] },
+  //       }).then((sellersStatistics) => {
+  //         let favSellers = [];
+  //         sellersStatistics.map((singleSeller) => {
+  //           singleSeller.myPublishedProductsSum.map((tag) => {
+  //             let check = false;
+  //             if (favSellers.length > 0) {
+  //               favSellers.map((favTag) => {
+  //                 if (favTag.tag === tag.tag) {
+  //                   favTag.score += tag.score; //check for better option
+  //                 }
+  //               });
+  //             } else {
+  //               check = true;
+  //               favSellers.push({ tag: tag.tag, score: 1 });
+  //             }
+  //             if (!check) {
+  //               favSellers.push({ tag: tag.tag, score: 1 });
+  //             }
+  //           });
+  //         });
+  //         Analytics.findOne({ _id: user_id }).then((analytics) => {
+  //           favSellers.sort((a, b) => a.score - b.score);
+  //           analytics.sellerPreferences = favSellers;
+  //           let sellerSuggestions = [];
+  //           Analytics.find().then((users) => {
+  //             users.map((user) => {
+  //               //here compare each seller to the user preference.
+  //               let singleSellerArray = [];
+  //               user.myPublishedProductsSum.map((tag) => {
+  //                 // seller avg tag score
+  //                 analytics.sellerPreferences.map((favTag) => {
+  //                   // user avg fav seller tag score
+  //                   if (tag.tag === favTag.tag) {
+  //                     singleSellerArray.push({
+  //                       tag: tag.tag,
+  //                       score: favTag.score,
+  //                     });
+  //                   }
+  //                 });
+  //               });
+  //               function getTheSum(sellerArray) {
+  //                 let sum = 0;
+  //                 sellerArray.forEach((tag) => {
+  //                   sum = sum + tag.score;
+  //                 });
+  //                 return sum;
+  //               }
+  //               sellerSuggestions.push({
+  //                 seller: user._id,
+  //                 score: getTheSum(singleSellerArray),
+  //               });
+  //             });
+  //           });
+  //           sellerSuggestions.sort((a, b) => a.score - b.score);
+  //           analytics.suggestedSellers = sellerSuggestions;
+  //           analytics?.save();
+  //         });
+  //       });
+  //     });
+  // },
+  // GetUnseen: async (user_id) => {
+  //   try {
+  //     console.log(user_id);
+  //     const analytics = Analytics.findOne({ user_id: user_id });
+  //     if (analytics) {
+  //       console.log(analytics?.unseen);
+  //       return analytics?.unseen;
+  //     }
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // },
   sortAndRemoveDuplicate: (arr) => {
     let clone = [];
     for (let i = 0; i < arr.length; i++) {

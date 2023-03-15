@@ -198,17 +198,18 @@ exports.signUp = async (req, res) => {
               res.status(500).json({message: "Error Email Save", error});
             });
 
-          Product.find({})
+          Product.find()
             .then((productList) => {
-              if (!productList)
+              if (!productList) {
                 return res
-                  .status(400)
-                  .json({message: "Error - ProductList null"});
+                    .status(400)
+                    .json({message: "Error - ProductList null"});
+              }
               else {
-                const newAnalytics = new Analytics({user_id: user._id});
-                newAnalytics.unseen = productList;
+                const newAnalytics = new Analytics({user_id: user._id, unseen:productList});
+                // newAnalytics.unseen = productList;
                 newAnalytics
-                  .save()
+                  ?.save()
                   .then((analytics) => {
                     console.log({message: "Analytics saved successfully"});
                   })
