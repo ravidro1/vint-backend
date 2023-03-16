@@ -102,7 +102,7 @@ module.exports = {
         media: [{url: imageURL, type: productMedia.typeImageOrVideo}],
         category: productCategory,
         onBid: onBid,
-        size:size,
+        size: size,
         condition: productCondition,
         seller: userId,
         tags: modifiedTags,
@@ -115,7 +115,7 @@ module.exports = {
         });
       });
 
-      res.send(product);
+      res.status(200).json({message: "Product Created", product});
       SumMyProducts(userId);
     } catch (e) {
       console.log(e);

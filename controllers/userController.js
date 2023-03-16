@@ -296,10 +296,12 @@ exports.verifyEmail = (req, res) => {
 
 exports.userInfo = (req, res) => {
   const {userID} = req.body;
-  User.findOne({_id:userID}).populate("userProducts").then((user)=>{
-    res.send(user)
-  })
-}
+  User.findOne({_id: userID})
+    .populate("userProducts")
+    .then((user) => {
+      res.send(user);
+    });
+};
 
 /////// (username, password)
 exports.login = (req, res) => {
@@ -534,6 +536,7 @@ exports.removeProductFromUserProductsList = (req, res) => {
   }
 };
 
+//////////////////// (userID)
 exports.getUserProductsList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
@@ -603,6 +606,7 @@ exports.removeSellerFromFollowingList = (req, res) => {
   }
 };
 
+///////////// (userID)
 exports.getFollowingList = (req, res) => {
   try {
     User.findById(req.body.userID).then((user) => {
@@ -723,3 +727,17 @@ function SumSellers(userId) {
       });
     });
 }
+
+//////////////////// (userID) ///////////////
+exports.getUserById = (req, res) => {
+  try {
+    User.findById(req.body.userID).then((user) => {
+      if (!user) res.status(400).json({message: "User Not Found"});
+      else {
+        res.status(200).json({message: "User Found", user});
+      }
+    });
+  } catch (error) {
+    res.status(500).json({message: "Error - getUserById", error});
+  }
+};
