@@ -445,16 +445,26 @@ exports.changeProfilePicture = async (req, res) => {
 ////////// wish list //////////////////////////////////////////////////////////////////
 exports.getWishList = (req, res) => {
   try {
-    User.findById(req.body.userID).then((user) => {
-      if (!user) res.status(400).json({message: "User not found"});
-      else {
-        user.populate("WishList").then((populateUser) => {
-          res
-            .status(200)
-            .json({message: "wish list", wishList: populateUser.wishList});
+    User.findOne({_id:req.body.userID}).then((user)=>{
+      user.WishList.map((objects)=>{
+
+      })
+      console.log(user.WishList[0].toString())
+
+
+      user.populate("WishList").then((userPopulate) => {
+        console.log(userPopulate)
+      })
+
+      Product.find({_id: {$in: user.WishList.map((product)=>product.toString())}}).then((products)=>{
+        console.log(products)
+      })
+      // console.log(thi)
+    })
+    User.findOne({_id:req.body.userID}).populate("WishList").then((populateUser) => {
+      console.log(populateUser)
+          res.status(200).json({message: "wish list", wishList: populateUser?.WishList});
         });
-      }
-    });
   } catch (error) {
     res.status(500).json({message: "Error - getWishList", err: error});
   }
@@ -465,9 +475,11 @@ exports.addToWishList = (req, res) => {
     User.findById(req.body.userID).then((user) => {
       if (!user) res.status(400).json({message: "User not found"});
       else {
-        user?.update({
-          WishList: [...user.WishList, req.body.newItemWishList],
-        });
+
+        User.findByIdAndUpdate(user._id, {WishList: [...user.WishList, req.body.newItemWishList]}).then((u) => {
+          console.log(u, 8977987545)})
+        // user.WishList = [...user.WishList, req.body.newItemWishList]
+        // user.save()
       }
     });
   } catch (error) {
