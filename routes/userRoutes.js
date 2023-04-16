@@ -20,6 +20,8 @@ const {
   removeFromWishList,
   addToWishList,
 
+  getUserById,
+
   addSellerToFollowingList,
   getFollowingList,
   removeSellerFromFollowingList,
@@ -61,5 +63,6 @@ router.post(
 );
 router.post("/getUserProductsList", getUserProductsList);
 router.post("/addProductToUserProductsList", addProductToUserProductsList);
+router.post("/getUserById", getUserById);
 
 module.exports = router;
